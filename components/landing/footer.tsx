@@ -17,10 +17,14 @@ export function Footer({ scrollToSection, servicesRef }: FooterProps = {}) {
             <h3 className="text-lg font-bold mb-4">HomeFix</h3>
             <ul className="space-y-2">
               <li>
-                <button className="hover:text-primary">About Us</button>
+                <Link href="/about" className="hover:text-primary">
+                  About Us
+                </Link>
               </li>
               <li>
-                <button className="hover:text-primary">Contact Us</button>
+                <Link href="/contact" className="hover:text-primary">
+                  Contact Us
+                </Link>
               </li>
             </ul>
           </div>

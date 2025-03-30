@@ -1,5 +1,6 @@
 import type React from "react"
 import Image from "next/image"
+import Link from "next/link"
 import { ArrowRight, Star } from "lucide-react"
 
 type Provider = {
@@ -63,9 +64,12 @@ export function ProvidersSection({ featuredProviders, forwardedRef }: ProvidersS
           ))}
         </div>
         <div className="text-center mt-10">
-          <button className="inline-flex items-center justify-center rounded-md border border-gray-300 bg-white px-6 py-3 text-base font-medium text-gray-700 shadow-sm hover:bg-gray-50">
+          <Link
+            href="/providers"
+            className="inline-flex items-center justify-center rounded-md border border-gray-300 bg-white px-6 py-3 text-base font-medium text-gray-700 shadow-sm hover:bg-gray-50"
+          >
             View All Providers
-          </button>
+          </Link>
         </div>
       </div>
     </section>
