@@ -27,7 +27,7 @@ export default function LoginPage() {
           <div className="container mx-auto px-4 sm:px-6">
             <div className="max-w-md mx-auto">
               <div className="bg-white p-8 rounded-lg shadow-sm border">
-                <LoginTypeSelector />
+              <LoginTypeSelector />
               </div>
             </div>
           </div>
@@ -38,4 +38,3 @@ export default function LoginPage() {
     </div>
   )
 }
-

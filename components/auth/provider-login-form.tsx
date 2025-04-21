@@ -6,6 +6,7 @@ import { useState } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { CheckCircle, Loader2 } from "lucide-react"
+import { login } from "@/app/actions/auth"
 
 export function ProviderLoginForm() {
   const router = useRouter()
@@ -44,19 +45,29 @@ export function ProviderLoginForm() {
     setErrors({})
 
     try {
-      // Simulate API call for authentication
-      await new Promise((resolve) => setTimeout(resolve, 1500))
+      // Create a FormData object to pass to the server action
+      const formData = new FormData()
+      formData.append('email', email)
+      formData.append('password', password)
 
-      // Simulate successful login
-      setIsSuccess(true)
+      // Call the server action
+      const result = await login(formData)
 
-      // Redirect after showing success message
-      setTimeout(() => {
-        router.push("/")
-      }, 1500)
+      // Make sure to check result properly
+      if (result && result.success === true) {
+        setIsSuccess(true)
+        // Redirect after showing success message
+        setTimeout(() => {
+          router.push("/providers")
+          router.refresh() // Refresh the page to update auth state
+        }, 1500)
+      } else {
+        // Show the error message from Supabase
+        setErrors({ form: result?.error || "Invalid email or password. Please try again." })
+      }
     } catch (error) {
       console.error("Login error:", error)
-      setErrors({ form: "Invalid email or password. Please try again." })
+      setErrors({ form: "An unexpected error occurred. Please try again." })
     } finally {
       setIsLoading(false)
     }
@@ -70,7 +81,7 @@ export function ProviderLoginForm() {
         </div>
         <h2 className="text-2xl font-bold mb-2">Login Successful!</h2>
         <p className="text-gray-600 mb-4">Welcome back to HomeFix. You are now logged in as a service provider.</p>
-        <p className="text-gray-600">Redirecting to homepage...</p>
+        <p className="text-gray-600">Redirecting to dashboard...</p>
       </div>
     )
   }
@@ -156,4 +167,3 @@ export function ProviderLoginForm() {
     </form>
   )
 }
-

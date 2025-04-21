@@ -1,11 +1,10 @@
 "use client"
 
-import type React from "react"
-
-import { useState } from "react"
+import React, { useState } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { CheckCircle, Loader2 } from "lucide-react"
+import { login } from "@/app/actions/auth"
 
 export function ClientLoginForm() {
   const router = useRouter()
@@ -43,23 +42,35 @@ export function ClientLoginForm() {
     setIsLoading(true)
     setErrors({})
 
-    try {
-      // Simulate API call for authentication
-      await new Promise((resolve) => setTimeout(resolve, 1500))
+    // In your handleSubmit function, update this section:
 
-      // Simulate successful login
-      setIsSuccess(true)
+try {
+  // Create a FormData object to pass to the server action
+  const formData = new FormData()
+  formData.append('email', email)
+  formData.append('password', password)
 
-      // Redirect after showing success message
-      setTimeout(() => {
-        router.push("/")
-      }, 1500)
-    } catch (error) {
-      console.error("Login error:", error)
-      setErrors({ form: "Invalid email or password. Please try again." })
-    } finally {
-      setIsLoading(false)
-    }
+  // Call the server action
+  const result = await login(formData)
+
+  // Make sure to check result properly
+  if (result && result.success === true) {
+    setIsSuccess(true)
+    // Redirect after showing success message
+    setTimeout(() => {
+      router.push("/services")
+      router.refresh() // Refresh the page to update auth state
+    }, 1500)
+  } else {
+    // Show the error message from Supabase
+    setErrors({ form: result?.error || "Invalid email or password. Please try again." })
+  }
+} catch (error) {
+  console.error("Login error:", error)
+  setErrors({ form: "An unexpected error occurred. Please try again." })
+} finally {
+  setIsLoading(false)
+}
   }
 
   if (isSuccess) {
@@ -156,4 +167,3 @@ export function ClientLoginForm() {
     </form>
   )
 }
-
