@@ -6,7 +6,7 @@ import { useState } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { CheckCircle, Loader2 } from "lucide-react"
-import { login } from "@/app/actions/auth"
+import {providerLogin  } from "@/app/actions/auth"
 
 export function ProviderLoginForm() {
   const router = useRouter()
@@ -51,14 +51,14 @@ export function ProviderLoginForm() {
       formData.append('password', password)
 
       // Call the server action
-      const result = await login(formData)
+      const result = await providerLogin(formData)
 
       // Make sure to check result properly
       if (result && result.success === true) {
         setIsSuccess(true)
         // Redirect after showing success message
         setTimeout(() => {
-          router.push("/providers")
+          router.push("/provider/dashboard")
           router.refresh() // Refresh the page to update auth state
         }, 1500)
       } else {

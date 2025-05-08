@@ -58,7 +58,7 @@ export function middleware(request: NextRequest) {
   // This forces the middleware to wait for the user to be fetched
   return getUserPromise.then(({ data: { user } }) => {
     // List of public routes that don't require authentication
-    const publicRoutes = ['/', '/login', '/auth', '/register', '/about', '/services', '/contact']
+    const publicRoutes = ['/', '/login', '/auth', '/register', '/about', '/services','/signup', '/contact']
     
     // Check if the current path is a public route or starts with one
     const isPublicRoute = publicRoutes.some(route => 

@@ -4,7 +4,7 @@ import React, { useState } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { CheckCircle, Loader2 } from "lucide-react"
-import { login } from "@/app/actions/auth"
+import { clientLogin } from "@/app/actions/auth"
 
 export function ClientLoginForm() {
   const router = useRouter()
@@ -51,14 +51,14 @@ try {
   formData.append('password', password)
 
   // Call the server action
-  const result = await login(formData)
+  const result = await clientLogin(formData)
 
   // Make sure to check result properly
   if (result && result.success === true) {
     setIsSuccess(true)
     // Redirect after showing success message
     setTimeout(() => {
-      router.push("/services")
+      router.push("/client/dashboard")
       router.refresh() // Refresh the page to update auth state
     }, 1500)
   } else {

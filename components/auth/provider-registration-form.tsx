@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-
+import { providerSignup } from "@/app/actions/auth"
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { ArrowLeft, Camera, CheckCircle } from "lucide-react"
@@ -82,19 +82,33 @@ export function ProviderRegistrationForm({ onBack }: ProviderRegistrationFormPro
     setIsSubmitting(true)
 
     try {
-      // Simulate API call to register provider
-      await new Promise((resolve) => setTimeout(resolve, 1500))
+      // Create a FormData object with all provider information
+      const formDataObj = new FormData()
+      formDataObj.append('email', formData.email)
+      formDataObj.append('password', formData.password)
+      formDataObj.append('name', formData.name)
+      formDataObj.append('phone', formData.phone)
+      formDataObj.append('location', formData.location)
+      formDataObj.append('category', formData.category)
+      formDataObj.append('description', formData.description)
+      formDataObj.append('startingPrice', formData.startingPrice)
+      formDataObj.append('availability', formData.availability)
 
-      // Simulate successful registration
-      setIsSuccess(true)
+      // Call the server action
+      const result = await providerSignup(formDataObj)
 
-      // Redirect after showing success message
-      setTimeout(() => {
-        router.push("/")
-      }, 2000)
+      if (result.success) {
+        setIsSuccess(true)
+        // Redirect after showing success message
+        setTimeout(() => {
+          router.push("/provider/dashboard") 
+        }, 2000)
+      } else {
+        setErrors({ form: result.error || "Registration failed. Please try again." })
+      }
     } catch (error) {
       console.error("Registration error:", error)
-      setErrors({ form: "An error occurred during registration. Please try again." })
+      setErrors({ form: "An unexpected error occurred. Please try again." })
     } finally {
       setIsSubmitting(false)
     }

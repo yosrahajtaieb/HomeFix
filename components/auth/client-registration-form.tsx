@@ -1,6 +1,7 @@
 "use client"
 
 import type React from "react"
+import { clientSignup } from "@/app/actions/auth"
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
@@ -73,19 +74,30 @@ export function ClientRegistrationForm({ onBack }: ClientRegistrationFormProps) 
     setIsSubmitting(true)
 
     try {
-      // Simulate API call to register client
-      await new Promise((resolve) => setTimeout(resolve, 1500))
+      // Create a FormData object with all client information
+      const formDataObj = new FormData()
+      formDataObj.append('email', formData.email)
+      formDataObj.append('password', formData.password)
+      formDataObj.append('firstName', formData.firstName)
+      formDataObj.append('lastName', formData.lastName)
+      formDataObj.append('phone', formData.phone)
+      formDataObj.append('address', formData.address || '')
 
-      // Simulate successful registration
-      setIsSuccess(true)
+      // Call the server action
+      const result = await clientSignup(formDataObj)
 
-      // Redirect after showing success message
-      setTimeout(() => {
-        router.push("/")
-      }, 2000)
+      if (result.success) {
+        setIsSuccess(true)
+        // Redirect after showing success message
+        setTimeout(() => {
+          router.push("/client/dashboard") // or your page that lists all services
+        }, 2000)
+      } else {
+        setErrors({ form: result.error || "Registration failed. Please try again." })
+      }
     } catch (error) {
       console.error("Registration error:", error)
-      setErrors({ form: "An error occurred during registration. Please try again." })
+      setErrors({ form: "An unexpected error occurred. Please try again." })
     } finally {
       setIsSubmitting(false)
     }
