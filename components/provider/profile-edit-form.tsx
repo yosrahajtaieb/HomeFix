@@ -1,39 +1,67 @@
 "use client"
 
-import type React from "react"
-
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { Loader2 } from "lucide-react"
-import { serviceCategories } from "@/data/service-categories"
+import { createClient } from "@/utils/supabase/client"
 
 export function ProviderProfileEditForm() {
   const router = useRouter()
   const [isSubmitting, setIsSubmitting] = useState(false)
-
-  // In a real app, this would be fetched from the database
+  const [loading, setLoading] = useState(true)
+  const [errors, setErrors] = useState<Record<string, string>>({})
   const [formData, setFormData] = useState({
-    firstName: "John",
-    lastName: "Smith",
-    email: "johnsmith@example.com",
-    phone: "(555) 987-6543",
-    address: "456 Business Ave",
-    city: "New York",
-    state: "NY",
-    zipCode: "10001",
-    businessName: "Smith Plumbing Services",
-    category: "plumbing",
-    description: "Professional plumber with over 15 years of experience in residential and commercial plumbing.",
+    phone: "",
+    location: "",
+    description: "",
+    startingPrice: "",
+    availability: "",
+    password: "",
+    confirmPassword: "",
+    // For display only:
+    name: "",
+    email: "",
+    category: "",
   })
 
-  const [errors, setErrors] = useState<Record<string, string>>({})
+  useEffect(() => {
+    const fetchProvider = async () => {
+      const supabase = createClient()
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session?.user) {
+        setLoading(false)
+        setErrors({ form: "Not logged in" })
+        return
+      }
+      const { data, error } = await supabase
+        .from("providers")
+        .select("*")
+        .eq("id", session.user.id)
+        .single()
+      if (data) {
+        setFormData({
+          phone: data.phone || "",
+          location: data.location || "",
+          description: data.description || "",
+          startingPrice: data.starting_price ? String(data.starting_price) : "",
+          availability: data.availability || "",
+          password: "",
+          confirmPassword: "",
+          name: data.name || "",
+          email: data.email || "",
+          category: data.category || "",
+        })
+      }
+      if (error) setErrors({ form: "Could not fetch profile" })
+      setLoading(false)
+    }
+    fetchProvider()
+  }, [])
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target
     setFormData((prev) => ({ ...prev, [name]: value }))
-
-    // Clear error when field is edited
     if (errors[name]) {
       setErrors((prev) => {
         const newErrors = { ...prev }
@@ -45,99 +73,91 @@ export function ProviderProfileEditForm() {
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {}
-
-    if (!formData.firstName.trim()) newErrors.firstName = "First name is required"
-    if (!formData.lastName.trim()) newErrors.lastName = "Last name is required"
-    if (!formData.email.trim()) newErrors.email = "Email is required"
-    else if (!/\S+@\S+\.\S+/.test(formData.email)) newErrors.email = "Email is invalid"
     if (!formData.phone.trim()) newErrors.phone = "Phone number is required"
-    if (!formData.businessName.trim()) newErrors.businessName = "Business name is required"
-
+    if (!formData.description.trim()) newErrors.description = "Description is required"
+    if (!formData.location.trim()) newErrors.location = "Location is required"
+    if (!formData.startingPrice.trim()) newErrors.startingPrice = "Starting price is required"
+    else if (isNaN(Number(formData.startingPrice)) || Number(formData.startingPrice) <= 0) {
+      newErrors.startingPrice = "Starting price must be a positive number"
+    }
+    if (formData.password || formData.confirmPassword) {
+      if (formData.password.length < 6) newErrors.password = "Password must be at least 6 characters"
+      if (formData.password !== formData.confirmPassword) newErrors.confirmPassword = "Passwords do not match"
+    }
     return newErrors
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-
     const formErrors = validateForm()
     if (Object.keys(formErrors).length > 0) {
       setErrors(formErrors)
       return
     }
-
     setIsSubmitting(true)
-
     try {
-      // Simulate API call to update profile
-      await new Promise((resolve) => setTimeout(resolve, 1000))
-
-      // Redirect back to dashboard
-      router.push("/provider/dashboard")
+      const supabase = createClient()
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session?.user) {
+        setErrors({ form: "Not logged in" })
+        setIsSubmitting(false)
+        return
+      }
+      // Update provider fields
+      const { error } = await supabase
+        .from("providers")
+        .update({
+          phone: formData.phone,
+          location: formData.location,
+          description: formData.description,
+          starting_price: formData.startingPrice ? Number(formData.startingPrice) : null,
+          availability: formData.availability,
+        })
+        .eq("id", session.user.id)
+      // Update password if provided
+      if (!error && formData.password) {
+        const { error: pwError } = await supabase.auth.updateUser({ password: formData.password })
+        if (pwError) {
+          setErrors({ form: "Profile updated, but password change failed: " + pwError.message })
+          setIsSubmitting(false)
+          return
+        }
+      }
+      if (error) {
+        setErrors({ form: "An error occurred while updating your profile. Please try again." })
+      } else {
+        router.push("/provider/dashboard")
+      }
     } catch (error) {
-      console.error("Error updating profile:", error)
       setErrors({ form: "An error occurred while updating your profile. Please try again." })
     } finally {
       setIsSubmitting(false)
     }
   }
 
+  if (loading) return <p>Loading...</p>
+
   return (
     <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-sm border overflow-hidden">
       <div className="p-6">
-        <h3 className="text-lg font-semibold mb-6">Personal Information</h3>
-
+        {/* Display only (not editable) */}
+        <div className="mb-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+              <div className="bg-gray-100 px-3 py-2 rounded">{formData.name}</div>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
+              <div className="bg-gray-100 px-3 py-2 rounded">{formData.email}</div>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Service Category</label>
+              <div className="bg-gray-100 px-3 py-2 rounded">{formData.category}</div>
+            </div>
+          </div>
+        </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
-            <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 mb-1">
-              First Name *
-            </label>
-            <input
-              type="text"
-              id="firstName"
-              name="firstName"
-              value={formData.firstName}
-              onChange={handleChange}
-              className={`w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-primary focus:border-primary ${
-                errors.firstName ? "border-red-500" : "border-gray-300"
-              }`}
-            />
-            {errors.firstName && <p className="mt-1 text-sm text-red-500">{errors.firstName}</p>}
-          </div>
-
-          <div>
-            <label htmlFor="lastName" className="block text-sm font-medium text-gray-700 mb-1">
-              Last Name *
-            </label>
-            <input
-              type="text"
-              id="lastName"
-              name="lastName"
-              value={formData.lastName}
-              onChange={handleChange}
-              className={`w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-primary focus:border-primary ${
-                errors.lastName ? "border-red-500" : "border-gray-300"
-              }`}
-            />
-            {errors.lastName && <p className="mt-1 text-sm text-red-500">{errors.lastName}</p>}
-          </div>
-
-          <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-              Email Address *
-            </label>
-            <input
-              type="email"
-              id="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              className={`w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-primary focus:border-primary ${
-                errors.email ? "border-red-500" : "border-gray-300"
-              }`}
-            />
-            {errors.email && <p className="mt-1 text-sm text-red-500">{errors.email}</p>}
-          </div>
-
           <div>
             <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">
               Phone Number *
@@ -154,133 +174,120 @@ export function ProviderProfileEditForm() {
             />
             {errors.phone && <p className="mt-1 text-sm text-red-500">{errors.phone}</p>}
           </div>
-        </div>
-
-        <h3 className="text-lg font-semibold mt-8 mb-6">Business Information</h3>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
-            <label htmlFor="businessName" className="block text-sm font-medium text-gray-700 mb-1">
-              Business Name *
+            <label htmlFor="location" className="block text-sm font-medium text-gray-700 mb-1">
+              Location (City, State) *
             </label>
             <input
               type="text"
-              id="businessName"
-              name="businessName"
-              value={formData.businessName}
+              id="location"
+              name="location"
+              value={formData.location}
               onChange={handleChange}
               className={`w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-primary focus:border-primary ${
-                errors.businessName ? "border-red-500" : "border-gray-300"
+                errors.location ? "border-red-500" : "border-gray-300"
               }`}
             />
-            {errors.businessName && <p className="mt-1 text-sm text-red-500">{errors.businessName}</p>}
-          </div>
-
-          <div>
-            <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-1">
-              Service Category
-            </label>
-            <select
-              id="category"
-              name="category"
-              value={formData.category}
-              onChange={handleChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary focus:border-primary"
-            >
-              <option value="">Select a category</option>
-              {serviceCategories.map((category) => (
-                <option key={category.id} value={category.id}>
-                  {category.name}
-                </option>
-              ))}
-            </select>
+            {errors.location && <p className="mt-1 text-sm text-red-500">{errors.location}</p>}
           </div>
         </div>
-
-        <div className="mt-6">
-          <label htmlFor="address" className="block text-sm font-medium text-gray-700 mb-1">
-            Business Address
-          </label>
-          <input
-            type="text"
-            id="address"
-            name="address"
-            value={formData.address}
-            onChange={handleChange}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary focus:border-primary"
-          />
-        </div>
-
-        <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div>
-            <label htmlFor="city" className="block text-sm font-medium text-gray-700 mb-1">
-              City
-            </label>
-            <input
-              type="text"
-              id="city"
-              name="city"
-              value={formData.city}
-              onChange={handleChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary focus:border-primary"
-            />
-          </div>
-
-          <div>
-            <label htmlFor="state" className="block text-sm font-medium text-gray-700 mb-1">
-              State
-            </label>
-            <select
-              id="state"
-              name="state"
-              value={formData.state}
-              onChange={handleChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary focus:border-primary"
-            >
-              <option value="">Select State</option>
-              <option value="NY">New York</option>
-              <option value="CA">California</option>
-              <option value="TX">Texas</option>
-              <option value="FL">Florida</option>
-              <option value="IL">Illinois</option>
-              {/* Add more states as needed */}
-            </select>
-          </div>
-
-          <div>
-            <label htmlFor="zipCode" className="block text-sm font-medium text-gray-700 mb-1">
-              ZIP Code
-            </label>
-            <input
-              type="text"
-              id="zipCode"
-              name="zipCode"
-              value={formData.zipCode}
-              onChange={handleChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary focus:border-primary"
-            />
-          </div>
-        </div>
-
         <div className="mt-6">
           <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
-            Service Description
+            Service Description *
           </label>
           <textarea
             id="description"
             name="description"
-            rows={3}
+            rows={4}
             value={formData.description}
             onChange={handleChange}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary focus:border-primary"
-            placeholder="Describe your services and experience..."
+            placeholder="Describe your services, experience, and expertise..."
+            className={`w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-primary focus:border-primary ${
+              errors.description ? "border-red-500" : "border-gray-300"
+            }`}
           />
+          {errors.description && <p className="mt-1 text-sm text-red-500">{errors.description}</p>}
         </div>
-
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+          <div>
+            <label htmlFor="startingPrice" className="block text-sm font-medium text-gray-700 mb-1">
+              Starting Price ($/hour) *
+            </label>
+            <input
+              type="text"
+              id="startingPrice"
+              name="startingPrice"
+              value={formData.startingPrice}
+              onChange={handleChange}
+              className={`w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-primary focus:border-primary ${
+                errors.startingPrice ? "border-red-500" : "border-gray-300"
+              }`}
+            />
+            {errors.startingPrice && <p className="mt-1 text-sm text-red-500">{errors.startingPrice}</p>}
+          </div>
+          <div>
+            <label htmlFor="availability" className="block text-sm font-medium text-gray-700 mb-1">
+              Availability
+            </label>
+            <select
+              id="availability"
+              name="availability"
+              value={formData.availability}
+              onChange={handleChange}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary focus:border-primary"
+            >
+              <option value="">Select availability</option>
+              <option value="Available today">Available today</option>
+              <option value="Available tomorrow">Available tomorrow</option>
+              <option value="Available in 2 days">Available in 2 days</option>
+              <option value="Available next week">Available next week</option>
+              <option value="Available anytime">Available anytime</option>
+            </select>
+          </div>
+        </div>
+        {/* Password Change Section */}
+        <div className="mt-8">
+          <h3 className="text-lg font-semibold mb-4">Change Password</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+                New Password
+              </label>
+              <input
+                type="password"
+                id="password"
+                name="password"
+                value={formData.password}
+                onChange={handleChange}
+                className={`w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-primary focus:border-primary ${
+                  errors.password ? "border-red-500" : "border-gray-300"
+                }`}
+                autoComplete="new-password"
+              />
+              {errors.password && <p className="mt-1 text-sm text-red-500">{errors.password}</p>}
+            </div>
+            <div>
+              <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-1">
+                Confirm New Password
+              </label>
+              <input
+                type="password"
+                id="confirmPassword"
+                name="confirmPassword"
+                value={formData.confirmPassword}
+                onChange={handleChange}
+                className={`w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-primary focus:border-primary ${
+                  errors.confirmPassword ? "border-red-500" : "border-gray-300"
+                }`}
+                autoComplete="new-password"
+              />
+              {errors.confirmPassword && <p className="mt-1 text-sm text-red-500">{errors.confirmPassword}</p>}
+            </div>
+          </div>
+        </div>
         {errors.form && (
-          <div className="mt-6 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md">{errors.form}</div>
+          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md mt-6">{errors.form}</div>
         )}
-
         <div className="mt-8 flex justify-end space-x-4">
           <Link
             href="/provider/dashboard"

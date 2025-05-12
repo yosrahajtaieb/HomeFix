@@ -1,3 +1,4 @@
+"use client"
 import type { Metadata } from "next"
 import Image from "next/image"
 import Link from "next/link"
@@ -5,13 +6,37 @@ import { Header } from "@/components/landing/header"
 import { Footer } from "@/components/landing/footer"
 import { PageHeader } from "@/components/services/page-header"
 import { Calendar, Clock, Star, MapPin, ChevronRight } from "lucide-react"
+import { useEffect, useState } from "react";
+import { createClient } from "@/utils/supabase/client";
 
-export const metadata: Metadata = {
+
+/*export const metadata: Metadata = {
   title: "Client Dashboard - HomeFix",
   description: "Manage your home service bookings and account",
-}
+}*/
 
 export default function ClientDashboardPage() {
+  const [client, setClient] = useState<any>(null);
+const [loading, setLoading] = useState(true);
+
+useEffect(() => {
+  const fetchClient = async () => {
+    const supabase = createClient();
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session?.user) {
+      setLoading(false);
+      return;
+    }
+    const { data, error } = await supabase
+      .from("clients")
+      .select("*")
+      .eq("id", session.user.id)
+      .single();
+    setClient(data);
+    setLoading(false);
+  };
+  fetchClient();
+}, []);
   // Mock data - in a real app, this would come from a database
   const upcomingBookings = [
     {
@@ -34,45 +59,9 @@ export default function ClientDashboardPage() {
     },
   ]
 
-  const favoriteProviders = [
-    {
-      id: 1,
-      name: "John Smith",
-      image: "/placeholder.svg?height=40&width=40",
-      service: "Plumbing",
-      rating: 4.9,
-      location: "New York, NY",
-    },
-    {
-      id: 2,
-      name: "Sarah Johnson",
-      image: "/placeholder.svg?height=40&width=40",
-      service: "Electrical",
-      rating: 4.8,
-      location: "Los Angeles, CA",
-    },
-  ]
+ 
 
-  const recentActivity = [
-    {
-      id: 1,
-      type: "booking",
-      description: "Booked a plumbing service with John Smith",
-      date: "2023-06-10",
-    },
-    {
-      id: 2,
-      type: "review",
-      description: "Left a 5-star review for Sarah Johnson",
-      date: "2023-06-05",
-    },
-    {
-      id: 3,
-      type: "favorite",
-      description: "Added John Smith to favorites",
-      date: "2023-06-01",
-    },
-  ]
+  
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -90,17 +79,7 @@ export default function ClientDashboardPage() {
               <p className="text-3xl font-bold text-primary">{upcomingBookings.length}</p>
             </div>
 
-            <div className="bg-white p-6 rounded-lg shadow-sm border">
-              <h3 className="text-lg font-bold mb-2">Favorite Providers</h3>
-              <p className="text-gray-600 mb-4">Your saved service providers</p>
-              <p className="text-3xl font-bold text-primary">{favoriteProviders.length}</p>
-            </div>
-
-            <div className="bg-white p-6 rounded-lg shadow-sm border">
-              <h3 className="text-lg font-bold mb-2">Completed Services</h3>
-              <p className="text-gray-600 mb-4">Services you've received</p>
-              <p className="text-3xl font-bold text-primary">3</p>
-            </div>
+            
           </div>
 
           {/* Upcoming Bookings */}
@@ -178,121 +157,55 @@ export default function ClientDashboardPage() {
             </div>
           </div>
 
-          {/* Favorite Providers */}
-          <div className="mb-12">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl font-bold">Favorite Providers</h2>
-              <Link href="/providers" className="text-primary hover:underline flex items-center text-sm font-medium">
-                Find more providers <ChevronRight className="h-4 w-4 ml-1" />
-              </Link>
-            </div>
+         
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {favoriteProviders.map((provider) => (
-                <div key={provider.id} className="bg-white rounded-lg shadow-sm border p-6">
-                  <div className="flex items-center">
-                    <Image
-                      src={provider.image || "/placeholder.svg"}
-                      alt={provider.name}
-                      width={56}
-                      height={56}
-                      className="rounded-full mr-4"
-                    />
-                    <div>
-                      <h3 className="font-semibold text-lg">{provider.name}</h3>
-                      <p className="text-primary text-sm">{provider.service} Specialist</p>
-                      <div className="flex items-center mt-1">
-                        <Star className="h-4 w-4 text-yellow-400 fill-current" />
-                        <span className="ml-1 text-sm font-medium">{provider.rating}</span>
-                        <span className="mx-1.5 text-gray-300">•</span>
-                        <MapPin className="h-4 w-4 text-gray-400" />
-                        <span className="ml-1 text-sm text-gray-500">{provider.location}</span>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="mt-4 flex justify-end space-x-3">
-                    <Link href={`/providers/${provider.id}`} className="text-sm text-gray-600 hover:text-gray-900">
-                      View Profile
-                    </Link>
-                    <Link
-                      href={`/book/${provider.id}`}
-                      className="text-sm text-primary hover:text-primary/80 font-medium"
-                    >
-                      Book Now
-                    </Link>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
+          
 
-          {/* Recent Activity */}
-          <div>
-            <h2 className="text-2xl font-bold mb-6">Recent Activity</h2>
-            <div className="bg-white rounded-lg shadow-sm border overflow-hidden">
-              {recentActivity.length > 0 ? (
-                <div className="divide-y">
-                  {recentActivity.map((activity) => (
-                    <div key={activity.id} className="p-4 flex justify-between items-center">
-                      <div>
-                        <p className="font-medium">{activity.description}</p>
-                        <p className="text-sm text-gray-500">
-                          {new Date(activity.date).toLocaleDateString("en-US", {
-                            month: "long",
-                            day: "numeric",
-                            year: "numeric",
-                          })}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="p-6 text-center">
-                  <p className="text-gray-500">No recent activity to display.</p>
-                </div>
-              )}
-            </div>
-          </div>
-
+          
           {/* Account Details */}
-          <div className="mt-12">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl font-bold">Account Details</h2>
-              <Link
-                href="/client/profile/edit"
-                className="text-primary hover:underline flex items-center text-sm font-medium"
-              >
-                Edit Profile <ChevronRight className="h-4 w-4 ml-1" />
-              </Link>
+<div className="mt-12">
+  <div className="flex justify-between items-center mb-6">
+    <h2 className="text-2xl font-bold">Account Details</h2>
+    <Link
+      href="/client/profile/edit"
+      className="text-primary hover:underline flex items-center text-sm font-medium"
+    >
+      Edit Profile <ChevronRight className="h-4 w-4 ml-1" />
+    </Link>
+  </div>
+  <div className="bg-white rounded-lg shadow-sm border overflow-hidden">
+    <div className="p-6">
+      {loading ? (
+        <p>Loading...</p>
+      ) : client ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-500 mb-1">Full Name</label>
+              <p className="text-gray-900">{client.first_name} {client.last_name}</p>
             </div>
-            <div className="bg-white rounded-lg shadow-sm border overflow-hidden">
-              <div className="p-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <div className="mb-4">
-                      <label className="block text-sm font-medium text-gray-500 mb-1">Full Name</label>
-                      <p className="text-gray-900">John Doe</p>
-                    </div>
-                    <div className="mb-4">
-                      <label className="block text-sm font-medium text-gray-500 mb-1">Email Address</label>
-                      <p className="text-gray-900">johndoe@example.com</p>
-                    </div>
-                  </div>
-                  <div>
-                    <div className="mb-4">
-                      <label className="block text-sm font-medium text-gray-500 mb-1">Phone Number</label>
-                      <p className="text-gray-900">(555) 123-4567</p>
-                    </div>
-                    <div className="mb-4">
-                      <label className="block text-sm font-medium text-gray-500 mb-1">Address</label>
-                      <p className="text-gray-900">123 Main Street, New York, NY 10001</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-500 mb-1">Email Address</label>
+              <p className="text-gray-900">{client.email}</p>
             </div>
           </div>
+          <div>
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-500 mb-1">Phone Number</label>
+              <p className="text-gray-900">{client.phone}</p>
+            </div>
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-500 mb-1">Address</label>
+              <p className="text-gray-900">{client.address}</p>
+            </div>
+          </div>
+        </div>
+      ) : (
+        <p>No client data found.</p>
+      )}
+    </div>
+  </div>
+</div>
         </div>
       </main>
 
