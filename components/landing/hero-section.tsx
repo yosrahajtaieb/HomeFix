@@ -32,12 +32,7 @@ export function HeroSection({ scrollToSection, servicesRef }: HeroSectionProps) 
                 Find a Service
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
-              <Link
-                href="/become-provider"
-                className="inline-flex items-center justify-center rounded-md border border-gray-300 bg-white px-6 py-3 text-base font-medium text-gray-700 shadow-sm hover:bg-gray-50"
-              >
-                Become a Provider
-              </Link>
+              
             </div>
           </div>
           <div className="relative h-64 md:h-auto">

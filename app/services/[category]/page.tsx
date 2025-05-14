@@ -1,4 +1,6 @@
-import type { Metadata } from "next"
+"use client"
+
+import { useEffect, useState } from "react"
 import { notFound } from "next/navigation"
 import { Calendar } from "lucide-react"
 import { Header } from "@/components/landing/header"
@@ -7,67 +9,42 @@ import { ServicePageHeader } from "@/components/services/service-page-header"
 import { ServiceSearchFilter } from "@/components/services/service-search-filter"
 import { ServiceProvidersGrid } from "@/components/services/service-providers-grid"
 import { serviceCategories } from "@/data/service-categories"
-import { plumbingProviders } from "@/data/plumbing-providers"
-import { electricalProviders } from "@/data/electrical-providers"
-import { hvacProviders } from "@/data/hvac-providers"
-import { locksmithProviders } from "@/data/locksmith-providers"
+import { createClient } from "@/utils/supabase/client"
 
 type Props = {
   params: { category: string }
   searchParams: { date?: string }
 }
 
-export function generateMetadata({ params }: Props): Metadata {
-  const category = serviceCategories.find((cat) => cat.id === params.category)
-
-  if (!category) {
-    return {
-      title: "Service Not Found - HomeFix",
-      description: "The requested service category could not be found",
-    }
-  }
-
-  return {
-    title: `${category.name} Services - HomeFix`,
-    description: `Find top-rated ${category.name.toLowerCase()} professionals for all your home service needs`,
-  }
-}
-
 export default function ServiceCategoryPage({ params, searchParams }: Props) {
   const { category } = params
   const { date } = searchParams
 
-  // Find the category details
   const categoryDetails = serviceCategories.find((cat) => cat.id === category)
+  const [providers, setProviders] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    if (!categoryDetails) return
+    const fetchProviders = async () => {
+      const supabase = createClient()
+      const { data, error } = await supabase
+        .from("providers")
+        .select("*")
+        .eq("category", category)
+      setProviders(data || [])
+      setLoading(false)
+    }
+    fetchProviders()
+  }, [category, categoryDetails])
 
   if (!categoryDetails) {
     notFound()
   }
 
-  // Get the appropriate providers based on the category
-  let providers
-  switch (category) {
-    case "plumbing":
-      providers = plumbingProviders
-      break
-    case "electrical":
-      providers = electricalProviders
-      break
-    case "hvac":
-      providers = hvacProviders
-      break
-    case "locksmith":
-      providers = locksmithProviders
-      break
-    default:
-      providers = []
-  }
-
-  // Filter providers by date if provided
-  // In a real app, you would filter based on provider availability
-  // For this demo, we'll just simulate filtering by showing fewer providers
+  // Optionally filter by date if you want
   const filteredProviders = date
-    ? providers.filter((_, index) => index % 2 === 0) // Just a simple filter for demo purposes
+    ? providers.filter((_, index) => index % 2 === 0)
     : providers
 
   return (
@@ -95,11 +72,14 @@ export default function ServiceCategoryPage({ params, searchParams }: Props) {
 
         <ServiceSearchFilter searchPlaceholder={`Search ${categoryDetails.name.toLowerCase()} providers...`} />
 
-        <ServiceProvidersGrid providers={filteredProviders} />
+        {loading ? (
+          <div className="container mx-auto px-4 sm:px-6 py-8">Loading...</div>
+        ) : (
+          <ServiceProvidersGrid providers={filteredProviders} />
+        )}
       </main>
 
       <Footer />
     </div>
   )
 }
-

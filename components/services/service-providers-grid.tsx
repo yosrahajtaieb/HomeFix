@@ -31,7 +31,7 @@ export function ServiceProvidersGrid({ providers }: ServiceProvidersGridProps) {
               <div className="p-6">
                 <div className="flex items-center mb-4">
                   <Image
-                    src={provider.image || "/placeholder.svg"}
+                    src={provider.image || "/placeholder1.svg"}
                     alt={provider.name}
                     width={64}
                     height={64}
@@ -66,52 +66,13 @@ export function ServiceProvidersGrid({ providers }: ServiceProvidersGridProps) {
                   <Link href={`/providers/${provider.id}`} className="text-primary font-medium hover:underline">
                     View Profile
                   </Link>
-                  <Link
-                    href={`/book/${provider.id}`}
-                    className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary/90"
-                  >
-                    Book Now
-                  </Link>
+                  
                 </div>
               </div>
             </div>
           ))}
         </div>
-        {/* Pagination */}
-        <div className="mt-12 flex justify-center">
-          <nav className="inline-flex rounded-md shadow">
-            <a
-              href="#"
-              className="px-3 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
-            >
-              Previous
-            </a>
-            <a
-              href="#"
-              className="px-3 py-2 border-t border-b border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50"
-            >
-              1
-            </a>
-            <a
-              href="#"
-              className="px-3 py-2 border-t border-b border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50"
-            >
-              2
-            </a>
-            <a
-              href="#"
-              className="px-3 py-2 border-t border-b border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50"
-            >
-              3
-            </a>
-            <a
-              href="#"
-              className="px-3 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
-            >
-              Next
-            </a>
-          </nav>
-        </div>
+        
       </div>
     </section>
   )

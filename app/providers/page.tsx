@@ -1,26 +1,27 @@
-import type { Metadata } from "next"
+"use client"
+
+import { useEffect, useState } from "react"
 import { Header } from "@/components/landing/header"
 import { Footer } from "@/components/landing/footer"
 import { PageHeader } from "@/components/services/page-header"
 import { AllProvidersGrid } from "@/components/providers/all-providers-grid"
-import { plumbingProviders } from "@/data/plumbing-providers"
-import { electricalProviders } from "@/data/electrical-providers"
-import { hvacProviders } from "@/data/hvac-providers"
-import { locksmithProviders } from "@/data/locksmith-providers"
-
-export const metadata: Metadata = {
-  title: "All Service Providers - HomeFix",
-  description: "Browse our complete directory of trusted home service professionals",
-}
+import { createClient } from "@/utils/supabase/client"
 
 export default function AllProvidersPage() {
-  // Combine all providers and add category information
-  const allProviders = [
-    ...plumbingProviders.map((provider) => ({ ...provider, categoryId: "plumbing", categoryName: "Plumbing" })),
-    ...electricalProviders.map((provider) => ({ ...provider, categoryId: "electrical", categoryName: "Electrical" })),
-    ...hvacProviders.map((provider) => ({ ...provider, categoryId: "hvac", categoryName: "HVAC" })),
-    ...locksmithProviders.map((provider) => ({ ...provider, categoryId: "locksmith", categoryName: "Locksmith" })),
-  ]
+  const [providers, setProviders] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const fetchProviders = async () => {
+      const supabase = createClient()
+      const { data, error } = await supabase
+        .from("providers")
+        .select("*")
+      if (data) setProviders(data)
+      setLoading(false)
+    }
+    fetchProviders()
+  }, [])
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -33,7 +34,27 @@ export default function AllProvidersPage() {
         />
 
         <div className="container mx-auto px-4 sm:px-6 py-8">
-          <AllProvidersGrid providers={allProviders} />
+          {loading ? (
+            <div>Loading...</div>
+          ) : (
+            <AllProvidersGrid
+              providers={providers.map((provider) => ({
+                ...provider,
+                // Map your DB fields to the props expected by AllProvidersGrid
+                id: provider.id,
+                name: provider.name,
+                image: provider.image || "/placeholder1.svg",
+                rating: provider.rating || 0,
+                reviewCount: provider.reviewCount || 0,
+                description: provider.description,
+                location: provider.location,
+                startingPrice: provider.starting_price,
+                availability: provider.availability,
+                categoryId: provider.category || "",
+                categoryName: provider.category || "",
+              }))}
+            />
+          )}
         </div>
       </main>
 
@@ -41,4 +62,3 @@ export default function AllProvidersPage() {
     </div>
   )
 }
-
