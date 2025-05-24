@@ -112,12 +112,7 @@ export function AllProvidersGrid({ providers }: AllProvidersGridProps) {
                 <Link href={`/providers/${provider.id}`} className="text-primary font-medium hover:underline">
                   View Profile
                 </Link>
-                <Link
-                  href={`/book/${provider.id}`}
-                  className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary/90"
-                >
-                  Book Now
-                </Link>
+                
               </div>
             </div>
           </div>

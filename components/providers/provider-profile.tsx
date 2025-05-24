@@ -25,7 +25,7 @@ type Provider = {
   reviewCount: number;
   description: string;
   location: string;
-  startingPrice: number;
+  starting_price: number;
   availability: string;
   category: string;
 };
@@ -49,13 +49,12 @@ type Availability = {
 
 type ProviderProfileProps = {
   provider: Provider;
-  reviews: Review[];
+  
   availability: Availability;
 };
 
 export function ProviderProfile({
   provider,
-  reviews,
   availability,
 }: ProviderProfileProps) {
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
@@ -63,7 +62,9 @@ export function ProviderProfile({
   const [reviewText, setReviewText] = useState("");
   const [reviewRating, setReviewRating] = useState(0);
   const [submittingReview, setSubmittingReview] = useState(false);
+    const [reviewsState, setReviewsState] = useState<Review[]>([]);
   const [submitting, setSubmitting] = useState(false);
+  
   const [reviewSubmitted, setReviewSubmitted] = useState(false);
   const [userRole, setUserRole] = useState<"client" | "provider" | null>(null);
   const [authChecked, setAuthChecked] = useState(false);
@@ -156,19 +157,54 @@ const fetchBookedTimes = async (date = selectedDate) => {
       // Show error message
     }
   };
+const fetchReviews = async () => {
+  const supabase = createClient();
+  const { data, error } = await supabase
+    .from("reviews")
+    .select("*")
+    .eq("provider_id", provider.id)
+    .order("date", { ascending: false });
+  if (!error && data) {
+    setReviewsState(data);
+  }
+};
+const handleReviewSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  setSubmittingReview(true);
 
-  const handleReviewSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setSubmittingReview(true);
-    // Here you would send the review to your backend/Supabase
-    // For now, just simulate a submission
-    setTimeout(() => {
-      setReviewSubmitted(true);
-      setReviewText("");
-      setReviewRating(0);
-      setSubmittingReview(false);
-    }, 1000);
-  };
+  const supabase = createClient();
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
+
+  if (!session?.user) {
+    setSubmittingReview(false);
+    // Optionally show a login prompt
+    return;
+  }
+
+  // Insert the review into Supabase
+  const { error } = await supabase.from("reviews").insert({
+    provider_id: provider.id,
+    client_id: session.user.id,
+    author: session.user.user_metadata?.full_name || "Anonymous",
+    rating: reviewRating,
+    comment: reviewText,
+    // date will default to now()
+  });
+
+  setSubmittingReview(false);
+
+  if (!error) {
+    setReviewSubmitted(true);
+    setReviewText("");
+    setReviewRating(0);
+    await fetchReviews();
+  } else {
+    // Optionally, show an error message
+    alert("Failed to submit review.");
+  }
+};
 
   return (
     <div className="container mx-auto px-4 sm:px-6 py-8">
@@ -217,7 +253,7 @@ const fetchBookedTimes = async (date = selectedDate) => {
                   </div>
                   <div className="flex items-center font-medium">
                     <DollarSign className="h-4 w-4 mr-1" />
-                    <span>Starting from ${provider.startingPrice}/hour</span>
+                    <span>Starting from ${provider.starting_price}/hour</span>
                   </div>
                 </div>
               </div>
@@ -305,19 +341,7 @@ const fetchBookedTimes = async (date = selectedDate) => {
                 ))}
               </div>
 
-              <div className="bg-blue-50 border-l-4 border-blue-400 p-4">
-                <div className="flex">
-                  <div className="flex-shrink-0">
-                    <Clock className="h-5 w-5 text-blue-400" />
-                  </div>
-                  <div className="ml-3">
-                    <p className="text-sm text-blue-700">
-                      This provider typically responds to booking requests
-                      within 2 hours.
-                    </p>
-                  </div>
-                </div>
-              </div>
+              
             </div>
           </div>
 
@@ -338,7 +362,7 @@ const fetchBookedTimes = async (date = selectedDate) => {
               </div>
 
               <div className="space-y-6">
-                {reviews.map((review) => (
+                {reviewsState.map((review) => (
                   <div
                     key={review.id}
                     className="border-b pb-6 last:border-b-0 last:pb-0"
@@ -451,7 +475,7 @@ const fetchBookedTimes = async (date = selectedDate) => {
                       <div className="flex justify-between py-2 border-b">
                         <span className="font-medium">Starting Price</span>
                         <span className="font-bold">
-                          ${provider.startingPrice}/hour
+                          ${provider.starting_price}/hour
                         </span>
                       </div>
                       <p className="text-sm text-gray-500 mt-2">

@@ -109,9 +109,7 @@ export function ProviderLoginForm() {
           <label htmlFor="provider-password" className="block text-sm font-medium text-gray-700 mb-1">
             Password
           </label>
-          <Link href="/forgot-password" className="text-sm text-primary hover:underline">
-            Forgot password?
-          </Link>
+          
         </div>
         <input
           type="password"
@@ -125,17 +123,7 @@ export function ProviderLoginForm() {
         {errors.password && <p className="mt-1 text-sm text-red-500">{errors.password}</p>}
       </div>
 
-      <div className="flex items-center">
-        <input
-          id="provider-remember"
-          name="remember"
-          type="checkbox"
-          className="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded"
-        />
-        <label htmlFor="provider-remember" className="ml-2 block text-sm text-gray-700">
-          Remember me
-        </label>
-      </div>
+    
 
       {errors.form && (
         <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md">{errors.form}</div>
@@ -159,8 +147,8 @@ export function ProviderLoginForm() {
       <div className="text-center mt-4">
         <p className="text-sm text-gray-600">
           Don't have an account?{" "}
-          <Link href="/become-provider" className="text-primary hover:underline font-medium">
-            Register as Provider
+          <Link href="/signup" className="text-primary hover:underline font-medium">
+            Sign up
           </Link>
         </p>
       </div>

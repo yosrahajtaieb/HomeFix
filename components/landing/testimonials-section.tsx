@@ -50,4 +50,3 @@ export function TestimonialsSection({ testimonials }: TestimonialsSectionProps) 
     </section>
   )
 }
-

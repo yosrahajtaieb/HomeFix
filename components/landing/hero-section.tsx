@@ -37,7 +37,7 @@ export function HeroSection({ scrollToSection, servicesRef }: HeroSectionProps) 
           </div>
           <div className="relative h-64 md:h-auto">
             <Image
-              src="/placeholder.svg?height=400&width=600"
+              src="/homepage.jpg?height=400&width=600"
               alt="Home service professional"
               width={600}
               height={400}

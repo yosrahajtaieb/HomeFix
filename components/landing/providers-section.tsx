@@ -2,15 +2,19 @@ import type React from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { ArrowRight, Star } from "lucide-react"
-
+import { ProviderCard } from "@/components/providers/provider-card"
 type Provider = {
-  id: number
+  id: number | string
   name: string
-  category: string
-  rating: number
-  reviewCount: number
   image: string
+rating?: number
+  reviewCount?: number
   description: string
+  location?: string
+  startingPrice?: number
+  availability?: string
+  categoryId?: string
+  category: string
 }
 
 type ProvidersSectionProps = {
@@ -28,39 +32,20 @@ export function ProvidersSection({ featuredProviders, forwardedRef }: ProvidersS
         </div>
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
           {featuredProviders.map((provider) => (
-            <div
+            <ProviderCard
               key={provider.id}
-              className="border rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow"
-            >
-              <div className="p-6">
-                <div className="flex items-center mb-4">
-                  <Image
-                    src={provider.image || "/placeholder.svg"}
-                    alt={provider.name}
-                    width={64}
-                    height={64}
-                    className="rounded-full mr-4"
-                  />
-                  <div>
-                    <h3 className="text-lg font-bold">{provider.name}</h3>
-                    <p className="text-gray-600">{provider.category}</p>
-                  </div>
-                </div>
-                <div className="flex items-center mb-4">
-                  <div className="flex items-center text-yellow-400">
-                    <Star className="h-5 w-5 fill-current" />
-                    <span className="ml-1 text-gray-800 font-medium">{provider.rating}</span>
-                  </div>
-                  <span className="mx-2 text-gray-300">•</span>
-                  <span className="text-gray-600">{provider.reviewCount} reviews</span>
-                </div>
-                <p className="text-gray-700 mb-4">{provider.description}</p>
-                <button className="inline-flex items-center text-primary font-medium hover:underline">
-                  View Profile
-                  <ArrowRight className="ml-1 h-4 w-4" />
-                </button>
-              </div>
-            </div>
+              id={provider.id}
+              name={provider.name}
+              image={provider.image}
+             rating={provider.rating ?? 0}
+              reviewCount={provider.reviewCount ?? 0}
+              description={provider.description}
+              location={provider.location ?? ""}
+              startingPrice={provider.startingPrice ?? 0}
+              availability={provider.availability ?? ""}
+              categoryId={provider.categoryId ?? ""}
+              category={provider.category}
+              />
           ))}
         </div>
         <div className="text-center mt-10">
