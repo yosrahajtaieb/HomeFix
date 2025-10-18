@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { ClientLoginForm } from "./client-login-form"
 import { ProviderLoginForm } from "./provider-login-form"
+import Link from "next/link"
 
 type UserType = "client" | "provider" | null
 
@@ -34,8 +35,14 @@ export function LoginTypeSelector() {
         </div>
       </div>
 
-      {selectedType === "client" ? <ClientLoginForm /> : <ProviderLoginForm />}
+      {selectedType === "client" && <ClientLoginForm />}
+      {selectedType === "provider" && <ProviderLoginForm />}
+
+      <div className="mt-6 text-right">
+        <Link href="/admin/login" className="text-sm text-gray-600 hover:text-primary underline">
+          Login as Admin
+        </Link>
+      </div>
     </div>
   )
 }
-
