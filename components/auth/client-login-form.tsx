@@ -4,7 +4,7 @@ import React, { useState } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { CheckCircle, Loader2 } from "lucide-react"
-import { clientLogin } from "@/app/actions/auth"
+import { clientLogin } from "@/app/(auth)/actions/auth"
 
 export function ClientLoginForm() {
   const router = useRouter()

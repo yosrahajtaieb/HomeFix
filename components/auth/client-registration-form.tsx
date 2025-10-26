@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { clientSignup } from "@/app/actions/auth"
+import { clientSignup } from "@/app/(auth)/actions/auth"
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"

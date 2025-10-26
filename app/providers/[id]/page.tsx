@@ -1,50 +1,75 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { notFound, useParams } from "next/navigation"
-import { Header } from "@/components/landing/header"
-import { Footer } from "@/components/landing/footer"
-import { ProviderProfile } from "@/components/providers/provider-profile"
+import { useRouter } from "next/navigation"
+import { ProviderProfile } from "@/components/providers/profile/provider-profile"
+import { Header } from "@/components/landing/header" // Add this import
 import { createClient } from "@/utils/supabase/client"
 
-type Props = {
-  params: { id: string }
-}
-
-export default function ProviderProfilePage({ params }: Props) {
-  const providerId = params.id
+export default function ProviderPage({ params }: { params: { id: string } }) {
+  const router = useRouter()
   const [provider, setProvider] = useState<any>(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     const fetchProvider = async () => {
       const supabase = createClient()
-      const { data, error } = await supabase
+      
+      console.log("Fetching provider with ID:", params.id)
+      
+      const { data: providerData, error: providerError } = await supabase
         .from("providers")
         .select("*")
-        .eq("id", providerId)
-        .single()
-      setProvider(data)
+        .eq("id", params.id)
+        .maybeSingle()
+
+      console.log("Provider data:", providerData)
+      console.log("Provider error:", providerError)
+
+      if (providerError || !providerData) {
+        console.error("Redirecting due to error or no data")
+        router.push("/providers")
+        return
+      }
+
+      const { data: reviewsData } = await supabase
+        .from("reviews")
+        .select("rating")
+        .eq("provider_id", params.id)
+
+      const reviewCount = reviewsData?.length || 0
+      const averageRating = reviewCount > 0
+        ? (reviewsData?.reduce((sum, r) => sum + r.rating, 0) || 0) / reviewCount
+        : 0
+
+      setProvider({
+        ...providerData,
+        rating: parseFloat(averageRating.toFixed(1)),
+        reviewCount: reviewCount,
+      })
       setLoading(false)
     }
+
     fetchProvider()
-  }, [providerId])
+  }, [params.id, router])
 
-  if (loading) return <div>Loading...</div>
-  if (!provider) return notFound()
+  if (loading) {
+    return (
+      <div className="min-h-screen flex flex-col">
+        <Header /> {/* Add header even during loading */}
+        <div className="flex-1 flex items-center justify-center">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+            <p className="mt-4 text-gray-600">Loading provider...</p>
+          </div>
+        </div>
+      </div>
+    )
+  }
 
-  // You can keep using mock reviews and availability for now
-  const reviews = [
-    {
-      id: 1,
-      author: "Emily Wilson",
-      authorImage: "/placeholder1.svg?height=40&width=40",
-      rating: 5,
-      date: "2023-05-15",
-      comment: "Excellent service! Very professional and completed the job quickly. Would definitely hire again.",
-    },
-    // ...more mock reviews
-  ]
+  if (!provider) {
+    return null
+  }
 
   const availability = {
     schedule: [
@@ -53,21 +78,15 @@ export default function ProviderProfilePage({ params }: Props) {
       { day: "Wednesday", hours: "9:00 AM - 5:00 PM" },
       { day: "Thursday", hours: "9:00 AM - 5:00 PM" },
       { day: "Friday", hours: "9:00 AM - 5:00 PM" },
-      { day: "Saturday", hours: "10:00 AM - 2:00 PM" },
-      { day: "Sunday", hours: "Closed" },
+      { day: "Saturday", hours: "9:00 AM - 5:00 PM" },
+      { day: "Sunday", hours: "9:00 AM - 5:00 PM" },
     ],
-    nextAvailable: "Tomorrow",
   }
 
   return (
-    <div className="flex min-h-screen flex-col">
-      <Header />
-
-      <main className="flex-1">
-        <ProviderProfile provider={provider} reviews={reviews} availability={availability} />
-      </main>
-
-      <Footer />
+    <div className="min-h-screen flex flex-col">
+      <Header /> {/* Add header */}
+      <ProviderProfile provider={provider} availability={availability} />
     </div>
   )
 }

@@ -1,18 +1,20 @@
-"use client"
+"use client";
 
-import type React from "react"
-import { providerSignup } from "@/app/actions/auth"
-import { useState } from "react"
-import { useRouter } from "next/navigation"
-import { ArrowLeft, Camera, CheckCircle } from "lucide-react"
-import { serviceCategories } from "@/data/service-categories"
+import type React from "react";
+import { providerSignup } from "@/app/(auth)/actions/auth";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { ArrowLeft, Camera, CheckCircle } from "lucide-react";
+import { serviceCategories } from "@/data/service-categories";
 
 type ProviderRegistrationFormProps = {
-  onBack?: () => void
-}
+  onBack?: () => void;
+};
 
-export function ProviderRegistrationForm({ onBack }: ProviderRegistrationFormProps = {}) {
-  const router = useRouter()
+export function ProviderRegistrationForm({
+  onBack,
+}: ProviderRegistrationFormProps = {}) {
+  const router = useRouter();
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -23,96 +25,109 @@ export function ProviderRegistrationForm({ onBack }: ProviderRegistrationFormPro
     description: "",
     location: "",
     startingPrice: "",
-    availability: "Available next week",
-  })
-  const [errors, setErrors] = useState<Record<string, string>>({})
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [isSuccess, setIsSuccess] = useState(false)
+    available_from: "",
+  });
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    const { name, value } = e.target
-    setFormData((prev) => ({ ...prev, [name]: value }))
+  const handleChange = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >
+  ) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
 
     // Clear error when field is edited
     if (errors[name]) {
       setErrors((prev) => {
-        const newErrors = { ...prev }
-        delete newErrors[name]
-        return newErrors
-      })
+        const newErrors = { ...prev };
+        delete newErrors[name];
+        return newErrors;
+      });
     }
-  }
+  };
 
   const validateForm = () => {
-    const newErrors: Record<string, string> = {}
+    const newErrors: Record<string, string> = {};
 
-    if (!formData.name.trim()) newErrors.name = "Name is required"
-    if (!formData.email.trim()) newErrors.email = "Email is required"
-    else if (!/\S+@\S+\.\S+/.test(formData.email)) newErrors.email = "Email is invalid"
+    if (!formData.name.trim()) newErrors.name = "Name is required";
+    if (!formData.email.trim()) newErrors.email = "Email is required";
+    else if (!/\S+@\S+\.\S+/.test(formData.email))
+      newErrors.email = "Email is invalid";
 
-    if (!formData.phone.trim()) newErrors.phone = "Phone number is required"
-    if (!formData.category) newErrors.category = "Service category is required"
-    if (!formData.description.trim()) newErrors.description = "Description is required"
-    if (!formData.location.trim()) newErrors.location = "Location is required"
+    if (!formData.phone.trim()) newErrors.phone = "Phone number is required";
+    if (!formData.category) newErrors.category = "Service category is required";
+    if (!formData.description.trim())
+      newErrors.description = "Description is required";
+    if (!formData.location.trim()) newErrors.location = "Location is required";
 
-    if (!formData.startingPrice.trim()) newErrors.startingPrice = "Starting price is required"
-    else if (isNaN(Number(formData.startingPrice)) || Number(formData.startingPrice) <= 0) {
-      newErrors.startingPrice = "Starting price must be a positive number"
+    if (!formData.startingPrice.trim())
+      newErrors.startingPrice = "Starting price is required";
+    else if (
+      isNaN(Number(formData.startingPrice)) ||
+      Number(formData.startingPrice) <= 0
+    ) {
+      newErrors.startingPrice = "Starting price must be a positive number";
     }
 
-    if (!formData.password) newErrors.password = "Password is required"
-    else if (formData.password.length < 8) newErrors.password = "Password must be at least 8 characters"
+    if (!formData.password) newErrors.password = "Password is required";
+    else if (formData.password.length < 8)
+      newErrors.password = "Password must be at least 8 characters";
 
     if (formData.password !== formData.confirmPassword) {
-      newErrors.confirmPassword = "Passwords do not match"
+      newErrors.confirmPassword = "Passwords do not match";
     }
 
-    return newErrors
-  }
+    return newErrors;
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
 
-    const formErrors = validateForm()
+    const formErrors = validateForm();
     if (Object.keys(formErrors).length > 0) {
-      setErrors(formErrors)
-      return
+      setErrors(formErrors);
+      return;
     }
 
-    setIsSubmitting(true)
+    setIsSubmitting(true);
 
     try {
       // Create a FormData object with all provider information
-      const formDataObj = new FormData()
-      formDataObj.append('email', formData.email)
-      formDataObj.append('password', formData.password)
-      formDataObj.append('name', formData.name)
-      formDataObj.append('phone', formData.phone)
-      formDataObj.append('location', formData.location)
-      formDataObj.append('category', formData.category)
-      formDataObj.append('description', formData.description)
-      formDataObj.append('startingPrice', formData.startingPrice)
-      formDataObj.append('availability', formData.availability)
+      const formDataObj = new FormData();
+      formDataObj.append("email", formData.email);
+      formDataObj.append("password", formData.password);
+      formDataObj.append("name", formData.name);
+      formDataObj.append("phone", formData.phone);
+      formDataObj.append("location", formData.location);
+      formDataObj.append("category", formData.category);
+      formDataObj.append("description", formData.description);
+      formDataObj.append("startingPrice", formData.startingPrice);
+      formDataObj.append("available_from", formData.available_from);
 
       // Call the server action
-      const result = await providerSignup(formDataObj)
+      const result = await providerSignup(formDataObj);
 
       if (result.success) {
-        setIsSuccess(true)
+        setIsSuccess(true);
         // Redirect after showing success message
         setTimeout(() => {
-          router.push("/provider/dashboard") 
-        }, 2000)
+          router.push("/provider/dashboard");
+        }, 2000);
       } else {
-        setErrors({ form: result.error || "Registration failed. Please try again." })
+        setErrors({
+          form: result.error || "Registration failed. Please try again.",
+        });
       }
     } catch (error) {
-      console.error("Registration error:", error)
-      setErrors({ form: "An unexpected error occurred. Please try again." })
+      console.error("Registration error:", error);
+      setErrors({ form: "An unexpected error occurred. Please try again." });
     } finally {
-      setIsSubmitting(false)
+      setIsSubmitting(false);
     }
-  }
+  };
 
   if (isSuccess) {
     return (
@@ -122,17 +137,24 @@ export function ProviderRegistrationForm({ onBack }: ProviderRegistrationFormPro
         </div>
         <h2 className="text-2xl font-bold mb-2">Registration Successful!</h2>
         <p className="text-gray-600 mb-4">
-          Thank you for joining HomeFix as a service provider. Your account is being reviewed.
+          Thank you for joining HomeFix as a service provider. Your account is
+          being reviewed.
         </p>
-        <p className="text-gray-600">You will be redirected to the homepage shortly...</p>
+        <p className="text-gray-600">
+          You will be redirected to the homepage shortly...
+        </p>
       </div>
-    )
+    );
   }
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       {onBack && (
-        <button onClick={onBack} type="button" className="flex items-center text-primary hover:underline mb-6">
+        <button
+          onClick={onBack}
+          type="button"
+          className="flex items-center text-primary hover:underline mb-6"
+        >
           <ArrowLeft className="h-4 w-4 mr-1" />
           Back to options
         </button>
@@ -142,7 +164,10 @@ export function ProviderRegistrationForm({ onBack }: ProviderRegistrationFormPro
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
+            <label
+              htmlFor="name"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
               Full Name *
             </label>
             <input
@@ -155,11 +180,16 @@ export function ProviderRegistrationForm({ onBack }: ProviderRegistrationFormPro
                 errors.name ? "border-red-500" : "border-gray-300"
               }`}
             />
-            {errors.name && <p className="mt-1 text-sm text-red-500">{errors.name}</p>}
+            {errors.name && (
+              <p className="mt-1 text-sm text-red-500">{errors.name}</p>
+            )}
           </div>
 
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+            <label
+              htmlFor="email"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
               Email Address *
             </label>
             <input
@@ -172,11 +202,16 @@ export function ProviderRegistrationForm({ onBack }: ProviderRegistrationFormPro
                 errors.email ? "border-red-500" : "border-gray-300"
               }`}
             />
-            {errors.email && <p className="mt-1 text-sm text-red-500">{errors.email}</p>}
+            {errors.email && (
+              <p className="mt-1 text-sm text-red-500">{errors.email}</p>
+            )}
           </div>
 
           <div>
-            <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">
+            <label
+              htmlFor="phone"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
               Phone Number *
             </label>
             <input
@@ -189,11 +224,16 @@ export function ProviderRegistrationForm({ onBack }: ProviderRegistrationFormPro
                 errors.phone ? "border-red-500" : "border-gray-300"
               }`}
             />
-            {errors.phone && <p className="mt-1 text-sm text-red-500">{errors.phone}</p>}
+            {errors.phone && (
+              <p className="mt-1 text-sm text-red-500">{errors.phone}</p>
+            )}
           </div>
 
           <div>
-            <label htmlFor="location" className="block text-sm font-medium text-gray-700 mb-1">
+            <label
+              htmlFor="location"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
               Location (City, State) *
             </label>
             <input
@@ -206,7 +246,9 @@ export function ProviderRegistrationForm({ onBack }: ProviderRegistrationFormPro
                 errors.location ? "border-red-500" : "border-gray-300"
               }`}
             />
-            {errors.location && <p className="mt-1 text-sm text-red-500">{errors.location}</p>}
+            {errors.location && (
+              <p className="mt-1 text-sm text-red-500">{errors.location}</p>
+            )}
           </div>
         </div>
       </div>
@@ -215,7 +257,10 @@ export function ProviderRegistrationForm({ onBack }: ProviderRegistrationFormPro
         <h2 className="text-xl font-semibold">Service Information</h2>
 
         <div>
-          <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-1">
+          <label
+            htmlFor="category"
+            className="block text-sm font-medium text-gray-700 mb-1"
+          >
             Service Category *
           </label>
           <select
@@ -234,11 +279,16 @@ export function ProviderRegistrationForm({ onBack }: ProviderRegistrationFormPro
               </option>
             ))}
           </select>
-          {errors.category && <p className="mt-1 text-sm text-red-500">{errors.category}</p>}
+          {errors.category && (
+            <p className="mt-1 text-sm text-red-500">{errors.category}</p>
+          )}
         </div>
 
         <div>
-          <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
+          <label
+            htmlFor="description"
+            className="block text-sm font-medium text-gray-700 mb-1"
+          >
             Service Description *
           </label>
           <textarea
@@ -252,12 +302,17 @@ export function ProviderRegistrationForm({ onBack }: ProviderRegistrationFormPro
               errors.description ? "border-red-500" : "border-gray-300"
             }`}
           />
-          {errors.description && <p className="mt-1 text-sm text-red-500">{errors.description}</p>}
+          {errors.description && (
+            <p className="mt-1 text-sm text-red-500">{errors.description}</p>
+          )}
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label htmlFor="startingPrice" className="block text-sm font-medium text-gray-700 mb-1">
+            <label
+              htmlFor="startingPrice"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
               Starting Price ($/hour) *
             </label>
             <input
@@ -270,30 +325,40 @@ export function ProviderRegistrationForm({ onBack }: ProviderRegistrationFormPro
                 errors.startingPrice ? "border-red-500" : "border-gray-300"
               }`}
             />
-            {errors.startingPrice && <p className="mt-1 text-sm text-red-500">{errors.startingPrice}</p>}
+            {errors.startingPrice && (
+              <p className="mt-1 text-sm text-red-500">
+                {errors.startingPrice}
+              </p>
+            )}
           </div>
 
           <div>
-            <label htmlFor="availability" className="block text-sm font-medium text-gray-700 mb-1">
-              Availability
-            </label>
-            <select
-              id="availability"
-              name="availability"
-              value={formData.availability}
-              onChange={handleChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary focus:border-primary"
+            <label
+              htmlFor="available_from"
+              className="block text-sm font-medium text-gray-700 mb-1"
             >
-              <option value="Available today">Available today</option>
-              <option value="Available tomorrow">Available tomorrow</option>
-              <option value="Available in 2 days">Available in 2 days</option>
-              <option value="Available next week">Available next week</option>
-              <option value="Available anytime">Available anytime</option>
-            </select>
+              Available From Date *
+            </label>
+            <input
+              type="date"
+              id="available_from"
+              name="available_from"
+              min={new Date().toISOString().split("T")[0]}
+              value={formData.available_from || ""}
+              onChange={handleChange}
+              className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-primary focus:border-primary"
+              required
+            />
+            <p className="text-xs text-gray-500 mt-1">
+              Select the earliest date you can accept bookings
+            </p>
+            {errors.available_from && (
+              <p className="mt-1 text-sm text-red-500">
+                {errors.available_from}
+              </p>
+            )}
           </div>
         </div>
-
-        
       </div>
 
       <div className="space-y-4">
@@ -301,7 +366,10 @@ export function ProviderRegistrationForm({ onBack }: ProviderRegistrationFormPro
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+            <label
+              htmlFor="password"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
               Password *
             </label>
             <input
@@ -314,11 +382,16 @@ export function ProviderRegistrationForm({ onBack }: ProviderRegistrationFormPro
                 errors.password ? "border-red-500" : "border-gray-300"
               }`}
             />
-            {errors.password && <p className="mt-1 text-sm text-red-500">{errors.password}</p>}
+            {errors.password && (
+              <p className="mt-1 text-sm text-red-500">{errors.password}</p>
+            )}
           </div>
 
           <div>
-            <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-1">
+            <label
+              htmlFor="confirmPassword"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
               Confirm Password *
             </label>
             <input
@@ -331,13 +404,19 @@ export function ProviderRegistrationForm({ onBack }: ProviderRegistrationFormPro
                 errors.confirmPassword ? "border-red-500" : "border-gray-300"
               }`}
             />
-            {errors.confirmPassword && <p className="mt-1 text-sm text-red-500">{errors.confirmPassword}</p>}
+            {errors.confirmPassword && (
+              <p className="mt-1 text-sm text-red-500">
+                {errors.confirmPassword}
+              </p>
+            )}
           </div>
         </div>
       </div>
 
       {errors.form && (
-        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md">{errors.form}</div>
+        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md">
+          {errors.form}
+        </div>
       )}
 
       <div className="flex items-center">
@@ -370,6 +449,5 @@ export function ProviderRegistrationForm({ onBack }: ProviderRegistrationFormPro
         </button>
       </div>
     </form>
-  )
+  );
 }
-

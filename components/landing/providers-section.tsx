@@ -2,7 +2,7 @@ import type React from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { ArrowRight, Star } from "lucide-react"
-import { ProviderCard } from "@/components/providers/provider-card"
+import { ProviderCard } from "@/components/providers/cards/provider-card"
 type Provider = {
   id: number | string
   name: string
@@ -12,7 +12,7 @@ rating?: number
   description: string
   location?: string
   startingPrice?: number
-  availability?: string
+  available_from?: string
   categoryId?: string
   category: string
 }
@@ -42,7 +42,7 @@ export function ProvidersSection({ featuredProviders, forwardedRef }: ProvidersS
               description={provider.description}
               location={provider.location ?? ""}
               startingPrice={provider.startingPrice ?? 0}
-              availability={provider.availability ?? ""}
+              available_from={provider.available_from ?? ""}
               categoryId={provider.categoryId ?? ""}
               category={provider.category}
               />

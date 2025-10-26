@@ -4,7 +4,7 @@ import { useEffect, useState } from "react"
 import { Header } from "@/components/landing/header"
 import { Footer } from "@/components/landing/footer"
 import { PageHeader } from "@/components/services/page-header"
-import { AllProvidersGrid } from "@/components/providers/all-providers-grid"
+import { SortableProvidersGrid } from "@/components/providers/grids/sortable-providers-grid"
 import { createClient } from "@/utils/supabase/client"
 
 export default function AllProvidersPage() {
@@ -12,16 +12,42 @@ export default function AllProvidersPage() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    const fetchProviders = async () => {
-      const supabase = createClient()
-      const { data, error } = await supabase
-        .from("providers")
-        .select("*")
-      if (data) setProviders(data)
-      setLoading(false)
+  const fetchProviders = async () => {
+    const supabase = createClient();
+    
+    const { data: providersData } = await supabase
+      .from("providers")
+      .select("*");
+    
+    if (providersData) {
+      // Calculate ratings for each provider
+      const providersWithReviews = await Promise.all(
+        providersData.map(async (provider) => {
+          const { data: reviewsData } = await supabase
+            .from("reviews")
+            .select("rating")
+            .eq("provider_id", provider.id);
+
+          const reviewCount = reviewsData?.length || 0;
+          const averageRating = reviewCount > 0
+            ? (reviewsData?.reduce((sum, r) => sum + r.rating, 0) || 0) / reviewCount
+            : 0;
+
+          return {
+            ...provider,
+            rating: parseFloat(averageRating.toFixed(1)),
+            reviewCount: reviewCount,
+            image: provider.image || "/placeholder1.svg",
+          };
+        })
+      );
+
+      setProviders(providersWithReviews);
     }
-    fetchProviders()
-  }, [])
+    setLoading(false);
+  };
+  fetchProviders();
+}, []);
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -37,7 +63,7 @@ export default function AllProvidersPage() {
           {loading ? (
             <div>Loading...</div>
           ) : (
-            <AllProvidersGrid
+            <SortableProvidersGrid
               providers={providers.map((provider) => ({
                 ...provider,
                 // Map your DB fields to the props expected by AllProvidersGrid
@@ -49,7 +75,7 @@ export default function AllProvidersPage() {
                 description: provider.description,
                 location: provider.location,
                 startingPrice: provider.starting_price,
-                availability: provider.availability,
+                availableFrom: provider.available_from,
                 categoryId: provider.category || "",
                 categoryName: provider.category || "",
               }))}

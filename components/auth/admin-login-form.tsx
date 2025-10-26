@@ -1,10 +1,10 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
-
+import { createClient } from "@/utils/supabase/client"
 import { CheckCircle, Loader2 } from "lucide-react"
-import { adminLogin } from "@/app/actions/auth"
+import { adminLogin } from "@/app/(auth)/actions/auth"
 
 export function AdminLoginForm() {
   const router = useRouter()
@@ -13,6 +13,33 @@ export function AdminLoginForm() {
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [isLoading, setIsLoading] = useState(false)
   const [isSuccess, setIsSuccess] = useState(false)
+  const [isChecking, setIsChecking] = useState(true)
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      const supabase = createClient()
+      const { data: { session } } = await supabase.auth.getSession()
+      
+      if (session?.user) {
+        // Check if user is admin
+        const { data: adminData } = await supabase
+          .from("admins")
+          .select("id")
+          .eq("id", session.user.id)
+          .single()
+        
+        if (session?.user) {
+          router.replace("/")
+          return // Keep loading state during redirect
+        }
+      }
+      
+      // Only set to false if user is NOT logged in as admin
+      setIsChecking(false)
+    }
+    
+    checkAuth()
+  }, [router])
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {}
@@ -41,7 +68,6 @@ export function AdminLoginForm() {
       if (result && result.success === true) {
         setIsSuccess(true)
         setTimeout(() => {
-         
           router.push("/admin/dashboard")
           router.refresh()
         }, 1500)
@@ -53,6 +79,15 @@ export function AdminLoginForm() {
     } finally {
       setIsLoading(false)
     }
+  }
+
+  // Show loading state while checking auth
+  if (isChecking) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    )
   }
 
   if (isSuccess) {
@@ -122,8 +157,6 @@ export function AdminLoginForm() {
           "Log in as Admin"
         )}
       </button>
-
-      
     </form>
   )
 }

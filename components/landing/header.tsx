@@ -8,81 +8,66 @@ import Link from "next/link";
 export function Header() {
   const supabase = createClient();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [userType, setUserType] = useState<"client" | "provider" | null>(null);
+  const [userType, setUserType] = useState<"client" | "provider" | "admin" | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
-    const checkSession = async () => {
+    const determineUserType = async () => {
       const {
         data: { session },
-      } = await supabase.auth.getSession();
-      setIsLoggedIn(!!session?.user);
-    
-    if (session?.user) {
-      // Check clients table
-      const { data: clientData } = await supabase
-        .from("clients")
-        .select("id")
-        .eq("id", session.user.id)
-        .single();
-      if (clientData) {
-        setUserType("client");
-        return;
-      }
-      // Check providers table
-      const { data: providerData } = await supabase
-        .from("providers")
-        .select("id")
-        .eq("id", session.user.id)
-        .single();
-      if (providerData) {
-        setUserType("provider");
-        return;
-      }
-      setUserType(null);
-    } else {
-      setUserType(null);
-    }
-  };
-    checkSession();
+      } = await supabase.auth.getSession(); // fast, cached
+      const user = session?.user;
 
-    const { data: listener } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
-        setIsLoggedIn(!!session?.user);
-        // Repeat user type check on auth state change
-        if (session?.user) {
-          supabase
-            .from("clients")
-            .select("id")
-            .eq("id", session.user.id)
-            .single()
-            .then(({ data: clientData }) => {
-              if (clientData) {
-                setUserType("client");
-              } else {
-                supabase
-                  .from("providers")
-                  .select("id")
-                  .eq("id", session.user.id)
-                  .single()
-                  .then(({ data: providerData }) => {
-                    if (providerData) setUserType("provider");
-                    else setUserType(null);
-                  });
-              }
-            });
-        } else {
-          setUserType(null);
-        }
+      setIsLoggedIn(!!user);
+      if (!user) {
+        setUserType(null);
+        return;
       }
-    );
-  
+
+      const userId = user.id;
+
+      const [
+        { data: adminData },
+        { data: clientData },
+        { data: providerData },
+      ] = await Promise.all([
+        supabase.from("admins").select("id").eq("id", userId).maybeSingle(),
+        supabase.from("clients").select("id").eq("id", userId).maybeSingle(),
+        supabase.from("providers").select("id").eq("id", userId).maybeSingle(),
+      ]);
+
+      if (adminData) {
+        setUserType("admin");
+      } else if (providerData) {
+        setUserType("provider");
+      } else if (clientData) {
+        setUserType("client");
+      } else {
+        setUserType(null);
+      }
+    };
+
+    determineUserType();
+
+    const { data: listener } = supabase.auth.onAuthStateChange(() => {
+      determineUserType();
+    });
+
     return () => {
       listener.subscription.unsubscribe();
     };
-  }, []);
+  }, [supabase]);
 
   const toggleMenu = () => setMobileMenuOpen((prev) => !prev);
+
+  const dashboardLink =
+    userType === "admin"
+      ? "/admin/dashboard"
+      : userType === "provider"
+      ? "/provider/dashboard"
+      : userType === "client"
+      ? "/client/dashboard"
+      : "/";
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-white">
@@ -97,25 +82,15 @@ export function Header() {
             <span className="text-xl font-bold">HomeFix</span>
           </Link>
         </div>
-        {/* Desktop Nav */}
+
         <nav className="hidden md:flex items-center space-x-6">
           {isLoggedIn ? (
             <>
-              <Link
-                href={
-                  userType === "provider"
-                    ? "/provider/dashboard"
-                    : userType === "client"
-                    ? "/client/dashboard"
-                    : "/"
-                }
-                className="text-sm font-medium hover:text-primary"
-              >
+              <Link href={dashboardLink} className="text-sm font-medium hover:text-primary">
                 Profile
               </Link>
               <button
                 onClick={async () => {
-                  const supabase = createClient();
                   const { error } = await supabase.auth.signOut();
                   if (!error) {
                     window.location.href = "/login";
@@ -130,10 +105,7 @@ export function Header() {
             </>
           ) : (
             <>
-              <Link
-                href="/login"
-                className="text-sm font-medium hover:text-primary"
-              >
+              <Link href="/login" className="text-sm font-medium hover:text-primary">
                 Login
               </Link>
               <Link
@@ -146,30 +118,18 @@ export function Header() {
           )}
         </nav>
 
-        {/* Mobile Menu Toggle */}
         <button className="md:hidden" onClick={toggleMenu}>
-          {mobileMenuOpen ? (
-            <X className="h-6 w-6" />
-          ) : (
-            <Menu className="h-6 w-6" />
-          )}
+          {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
         </button>
       </div>
 
-      {/* Mobile Menu Dropdown */}
       {mobileMenuOpen && (
         <div className="md:hidden bg-white border-t shadow-sm">
           <nav className="flex flex-col space-y-4 p-4">
             {isLoggedIn ? (
               <>
                 <Link
-                  href={
-                    userType === "provider"
-                      ? "/provider/dashboard"
-                      : userType === "client"
-                      ? "/client/dashboard"
-                      : "/"
-                  }
+                  href={dashboardLink}
                   onClick={() => setMobileMenuOpen(false)}
                   className="text-sm font-medium"
                 >
@@ -177,7 +137,6 @@ export function Header() {
                 </Link>
                 <button
                   onClick={async () => {
-                    const supabase = createClient();
                     const { error } = await supabase.auth.signOut();
                     setMobileMenuOpen(false);
                     if (!error) {

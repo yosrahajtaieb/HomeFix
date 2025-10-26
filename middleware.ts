@@ -1,7 +1,9 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
-export function middleware(request: NextRequest) {
+export async function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl;
+  
   let response = NextResponse.next({
     request,
   })
@@ -52,29 +54,80 @@ export function middleware(request: NextRequest) {
     }
   )
 
-  // IMPORTANT: DO NOT REMOVE auth.getUser()
-  const getUserPromise = supabase.auth.getUser()
+  const { data: { user } } = await supabase.auth.getUser()
 
-  // This forces the middleware to wait for the user to be fetched
-  return getUserPromise.then(({ data: { user } }) => {
-    // List of public routes that don't require authentication
-    const publicRoutes = ['/', '/login','/admin/login', '/auth', '/register', '/about', '/services','/signup', '/contact']
-    
-    // Check if the current path is a public route or starts with one
-    const isPublicRoute = publicRoutes.some(route => 
-      request.nextUrl.pathname === route || 
-      request.nextUrl.pathname.startsWith(`${route}/`)
-    )
-    console.log("Route:", request.nextUrl.pathname, "Public:", isPublicRoute);
-    // Only redirect if user is not authenticated AND trying to access a protected route
-    if (!user && !isPublicRoute) {
-      const url = request.nextUrl.clone()
-      url.pathname = '/login'
-      return NextResponse.redirect(url)
+  // List of public routes that don't require authentication
+  const publicRoutes = [
+    '/', 
+    '/about', 
+    '/services',
+    '/contact', 
+    '/providers', 
+    '/resources', 
+    '/faq', 
+    '/terms', 
+    '/privacy'
+  ]
+  
+  // Auth pages that should redirect if user is already logged in
+  const authPages = ['/login', '/signup', '/forgot-password']
+  const isAuthPage = authPages.includes(pathname)
+  
+  // Dashboard routes
+  const dashboardRoutes = ['/client/dashboard', '/provider/dashboard', '/admin/dashboard']
+  const isDashboardRoute = dashboardRoutes.some(route => pathname.startsWith(route))
+  
+  // Check if the current path is a public route
+  const isPublicRoute = publicRoutes.some(route => 
+    pathname === route || pathname.startsWith(`${route}/`)
+  )
+
+  // If user is authenticated and trying to access auth pages (login/signup)
+  if (user && isAuthPage) {
+    // Check user role and redirect to appropriate dashboard
+    const { data: clientData } = await supabase
+      .from("clients")
+      .select("id")
+      .eq("id", user.id)
+      .maybeSingle();
+
+    const { data: providerData } = await supabase
+      .from("providers")
+      .select("id")
+      .eq("id", user.id)
+      .maybeSingle();
+
+    const { data: adminData } = await supabase
+      .from("admins")
+      .select("id")
+      .eq("id", user.id)
+      .maybeSingle();
+
+    // Redirect to appropriate dashboard
+    if (clientData) {
+      return NextResponse.redirect(new URL("/client/dashboard", request.url));
+    } else if (providerData) {
+      return NextResponse.redirect(new URL("/provider/dashboard", request.url));
+    } else if (adminData) {
+      return NextResponse.redirect(new URL("/admin/dashboard", request.url));
     }
+  }
 
-    return response
-  })
+  // If user is not authenticated and trying to access protected routes
+  if (!user && isDashboardRoute) {
+    // Allow admin login page
+    if (pathname === "/admin/login") {
+      return response;
+    }
+    return NextResponse.redirect(new URL("/login", request.url));
+  }
+
+  // If user is not authenticated and trying to access other protected routes
+  if (!user && !isPublicRoute && !isAuthPage && pathname !== "/admin/login") {
+    return NextResponse.redirect(new URL("/login", request.url));
+  }
+
+  return response
 }
 
 export const config = {

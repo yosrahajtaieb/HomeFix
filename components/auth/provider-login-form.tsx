@@ -6,7 +6,7 @@ import { useState } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { CheckCircle, Loader2 } from "lucide-react"
-import {providerLogin  } from "@/app/actions/auth"
+import {providerLogin  } from "@/app/(auth)/actions/auth"
 
 export function ProviderLoginForm() {
   const router = useRouter()
