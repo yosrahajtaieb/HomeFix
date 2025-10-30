@@ -4,6 +4,7 @@
 import { useState, useEffect } from "react";
 import { CalendarIcon, Star } from "lucide-react";
 import { createClient } from "@/utils/supabase/client";
+import { sendProviderBookingNotification } from "@/app/actions/booking-actions"; // ← CHANGE THIS
 
 type Provider = {
   id: number;
@@ -23,7 +24,8 @@ export function ProviderBooking({
   userRole,
   authChecked,
   onReviewSubmitted,
-}: Props) {
+
+}: Readonly<Props>) {
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
   const [reviewText, setReviewText] = useState("");
@@ -104,26 +106,45 @@ export function ProviderBooking({
     });
   };
 
-  const handleBooking = async (e: React.FormEvent) => {
+   
+const handleBooking = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitting(true);
     const supabase = createClient();
     const {
       data: { session },
     } = await supabase.auth.getSession();
+    
     if (!session?.user) {
       setSubmitting(false);
       return;
     }
-    const { error } = await supabase.from("bookings").insert({
-      provider_id: provider.id,
-      client_id: session.user.id,
-      date: selectedDate,
-      time: selectedTime,
-      status: "pending",
-    });
+
+    // Insert booking
+    const { data: bookingData, error } = await supabase
+      .from("bookings")
+      .insert({
+        provider_id: provider.id,
+        client_id: session.user.id,
+        date: selectedDate,
+        time: selectedTime,
+        status: "pending",
+      })
+      .select()
+      .single();
+
     setSubmitting(false);
-    if (!error) {
+
+    if (!error && bookingData) {
+      // ← REPLACE all the email sending code with this:
+      sendProviderBookingNotification(bookingData.id).then((result) => {
+        if (result.success) {
+          console.log("✅ Provider notification email sent");
+        } else {
+          console.error("❌ Failed to send provider email:", result.error);
+        }
+      });
+
       alert("Your booking is sent for confirmation!");
       fetchBookedTimes(selectedDate);
       setSelectedTime(null);
@@ -132,6 +153,8 @@ export function ProviderBooking({
     }
   };
 
+
+   
   const handleReviewSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmittingReview(true);

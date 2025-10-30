@@ -12,6 +12,7 @@ import {
 from "lucide-react";
 import { createClient } from "@/utils/supabase/client";
 import { BookingDetailsModal } from "./booking-details-modal";
+import { sendClientBookingStatusUpdate } from "@/app/actions/booking-actions";
 
 type Booking = {
   id: string;
@@ -19,7 +20,7 @@ type Booking = {
   provider_id: string;
   date: string;
   time: string;
-  status: "pending" | "confirmed" | "rejected";
+  status: "pending" | "confirmed" | "rejected" | "completed";
   notes: string | null;
   created_at: string;
   client?: {
@@ -119,6 +120,15 @@ export default function AdminBookingsTable() {
       .eq("id", id);
 
     if (!error) {
+      // ← ADD THIS: Send confirmation email to client
+      sendClientBookingStatusUpdate(id, "confirmed").then((result) => {
+        if (result.success) {
+          console.log("✅ Client confirmation email sent");
+        } else {
+          console.error("❌ Failed to send confirmation email:", result.error);
+        }
+      });
+
       setBookings(
         bookings.map((booking) =>
           booking.id === id
@@ -132,10 +142,22 @@ export default function AdminBookingsTable() {
   const handleCancel = async (id: string, reason: string) => {
     const { error } = await supabase
       .from("bookings")
-      .update({ status: "rejected", notes: reason })
+      .update({
+        status: "rejected",
+        notes: reason,
+      })
       .eq("id", id);
 
     if (!error) {
+      // ← ADD THIS: Send rejection email to client with reason
+      sendClientBookingStatusUpdate(id, "rejected", reason).then((result) => {
+        if (result.success) {
+          console.log("✅ Client rejection email sent");
+        } else {
+          console.error("❌ Failed to send rejection email:", result.error);
+        }
+      });
+
       setBookings(
         bookings.map((booking) =>
           booking.id === id
@@ -145,6 +167,7 @@ export default function AdminBookingsTable() {
       );
     }
   };
+
 
   const handleDelete = async (id: string) => {
     if (confirm("Are you sure you want to delete this booking?")) {
@@ -156,15 +179,29 @@ export default function AdminBookingsTable() {
     }
   };
 
-  const handleComplete = async (id: string) => {
+    const handleComplete = async (id: string) => {
     const { error } = await supabase
       .from("bookings")
       .update({ status: "completed" })
       .eq("id", id);
 
     if (!error) {
-      // Refresh bookings
-      fetchBookings();
+      // ← ADD THIS: Send completion email to client
+      sendClientBookingStatusUpdate(id, "completed").then((result) => {
+        if (result.success) {
+          console.log("✅ Client completion email sent");
+        } else {
+          console.error("❌ Failed to send completion email:", result.error);
+        }
+      });
+
+      setBookings(
+        bookings.map((booking) =>
+          booking.id === id
+            ? { ...booking, status: "completed" as const }
+            : booking
+        )
+      );
     }
   };
 

@@ -10,6 +10,7 @@ import { BookingsList } from "@/components/providers/dashboard/bookings-list";
 import { BookingsModal } from "@/components/providers/dashboard/bookings-modal";
 import { RecentReviews } from "@/components/providers/dashboard/recent-reviews";
 import { ReviewsModal } from "@/components/providers/dashboard/reviews-modal";
+import { sendClientBookingStatusUpdate } from "@/app/actions/booking-actions"; // ← ADD THIS IMPORT
 import { AccountDetails } from "@/components/providers/dashboard/account-details";
 import type {
   Provider,
@@ -59,50 +60,59 @@ export default function ProviderDashboardPage() {
         .select("*, clients(first_name, last_name)")
         .eq("provider_id", session?.user?.id || "")
         .order("date", { ascending: false });
-      
+
       if (reviewsError) {
         console.error("Error fetching reviews:", reviewsError);
       }
-      
+
       setReviews(reviewsData || []);
       setLoading(false);
     };
     fetchProviderData();
   }, []);
 
-  
-const handleUpdateBookingStatus = async (
-  bookingId: string,
-  status: "confirmed" | "rejected",
-  reason?: string // ← ADD this parameter
-) => {
-  const supabase = createClient();
-  
-  // ← ADD this: Build update object with optional reason
-  const updateData: { status: string; notes?: string } = { status };
-  
-  if (status === "rejected" && reason) {
-    updateData.notes = reason;
-  }
+  const handleUpdateBookingStatus = async (
+    bookingId: string,
+    status: "confirmed" | "rejected",
+    reason?: string
+  ) => {
+    const supabase = createClient();
 
-  await supabase
-    .from("bookings")
-    .update(updateData) // ← CHANGE from { status } to updateData
-    .eq("id", bookingId);
+    const updateData: { status: string; notes?: string } = { status };
 
-  const {
-    data: { session },
-  } = await supabase.auth.getSession();
-  const { data: jobsData } = await supabase
-    .from("bookings")
-    .select("*, clients(first_name, last_name, address)")
-    .eq("provider_id", session?.user?.id || "")
-    .order("date", { ascending: true });
+    if (status === "rejected" && reason) {
+      updateData.notes = reason;
+    }
 
-  setUpcomingJobs(jobsData || []);
-};
+    const { error } = await supabase // ← ADD error variable
+      .from("bookings")
+      .update(updateData)
+      .eq("id", bookingId);
 
+    // ← ADD THIS: Send email after successful update
+    if (!error) {
+      sendClientBookingStatusUpdate(bookingId, status, reason).then(
+        (result) => {
+          if (result.success) {
+            console.log(`✅ Client ${status} email sent`);
+          } else {
+            console.error(`❌ Failed to send client email:`, result.error);
+          }
+        }
+      );
+    }
 
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+    const { data: jobsData } = await supabase
+      .from("bookings")
+      .select("*, clients(first_name, last_name, address)")
+      .eq("provider_id", session?.user?.id || "")
+      .order("date", { ascending: true });
+
+    setUpcomingJobs(jobsData || []);
+  };
 
   const handleMarkCompleted = async (bookingId: string) => {
     setCompletingId(bookingId);
@@ -123,6 +133,14 @@ const handleUpdateBookingStatus = async (
         setCompletingId(null);
         return;
       }
+
+      sendClientBookingStatusUpdate(bookingId, "completed").then((result) => {
+        if (result.success) {
+          console.log("✅ Client completion email sent");
+        } else {
+          console.error("❌ Failed to send completion email:", result.error);
+        }
+      });
 
       const {
         data: { session },
