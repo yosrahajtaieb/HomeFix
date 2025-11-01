@@ -172,7 +172,7 @@ export function UserDetailsModal({
               </h3>
               <div className="space-y-3">
                 <p className="text-sm text-gray-700">
-                  Are you sure you want to suspend this user's account? They
+                  Are you sure you want to suspend this user&apos;s account? They
                   will not be able to access the platform.
                 </p>
                 <div>

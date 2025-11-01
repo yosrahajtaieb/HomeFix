@@ -78,6 +78,7 @@ export function ProviderProfile({
     }
   };
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     fetchReviews();
 

@@ -36,7 +36,7 @@ export function BookingsList({ bookings, onViewAll }: BookingsListProps) {
         ) : (
           <div className="p-6 text-center">
             <p className="text-gray-500">
-              You don't have any upcoming bookings.
+              You don&apos;t have any upcoming bookings.
             </p>
             <Link
               href="/services"

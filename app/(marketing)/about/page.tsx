@@ -28,13 +28,13 @@ export default function AboutPage() {
               <div>
                 <h2 className="text-3xl font-bold mb-6">Our Mission</h2>
                 <p className="text-lg text-gray-600 mb-6">
-                  At HomeFix, we believe that finding reliable home service professionals shouldn't be a challenge. Our
+                  At HomeFix, we believe that finding reliable home service professionals shouldn&apos;t be a challenge. Our
                   mission is to simplify the process of connecting homeowners with skilled, vetted professionals who can
                   handle all their home service needs.
                 </p>
                 <p className="text-lg text-gray-600">
-                  We're committed to transparency, quality, and exceptional customer service. By carefully vetting our
-                  service providers and facilitating seamless connections, we're creating a marketplace that homeowners
+                  We&apos;re committed to transparency, quality, and exceptional customer service. By carefully vetting our
+                  service providers and facilitating seamless connections, we&apos;re creating a marketplace that homeowners
                   can trust and professionals can thrive in.
                 </p>
               </div>
@@ -94,7 +94,7 @@ export default function AboutPage() {
                 </div>
                 <h3 className="text-xl font-bold mb-2">Quality</h3>
                 <p className="text-gray-600">
-                  We're committed to connecting homeowners with only the highest quality service professionals who
+                  We&apos;re committed to connecting homeowners with only the highest quality service professionals who
                   deliver exceptional work.
                 </p>
               </div>
@@ -127,7 +127,7 @@ export default function AboutPage() {
                 </div>
                 <h3 className="text-xl font-bold mb-2">Satisfaction</h3>
                 <p className="text-gray-600">
-                  We're dedicated to ensuring customer satisfaction at every step, from finding the right professional
+                  We&apos;re dedicated to ensuring customer satisfaction at every step, from finding the right professional
                   to completing the job.
                 </p>
               </div>

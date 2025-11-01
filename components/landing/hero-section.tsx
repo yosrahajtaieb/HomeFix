@@ -22,7 +22,7 @@ export function HeroSection({ scrollToSection, servicesRef }: HeroSectionProps) 
             </h1>
             <p className="text-xl text-gray-600">
               Connect with trusted professionals for all your home service needs. From plumbing to electrical work,
-              we've got you covered.
+              we&apos;ve got you covered.
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
               <Link

@@ -29,7 +29,7 @@ export function SignupTypeSelector() {
         >
           <UserRound className="h-16 w-16 text-primary mb-4" />
           <h3 className="text-xl font-semibold mb-2">Client</h3>
-          <p className="text-gray-600 text-center">I'm looking for home services and want to hire professionals</p>
+          <p className="text-gray-600 text-center">I&apos;m looking for home services and want to hire professionals</p>
         </button>
 
         <button

@@ -274,7 +274,7 @@ export function ProviderDetailsModal({
               </h3>
               <div className="space-y-3">
                 <p className="text-sm text-gray-700">
-                  Are you sure you want to suspend this provider's account? They
+                  Are you sure you want to suspend this provider&apos;s account? They
                   will not be able to receive bookings.
                 </p>
                 <div>

@@ -38,6 +38,8 @@ export default function AdminProvidersTable() {
   );
   const supabase = createClient();
 
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     fetchProviders();
   }, []);

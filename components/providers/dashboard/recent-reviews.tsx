@@ -79,7 +79,7 @@ export function RecentReviews({ reviews, onViewAll }: RecentReviewsProps) {
           </div>
         ) : (
           <div className="p-6 text-center">
-            <p className="text-gray-500">You don't have any reviews yet.</p>
+            <p className="text-gray-500">You don&apos;t have any reviews yet.</p>
           </div>
         )}
       </div>

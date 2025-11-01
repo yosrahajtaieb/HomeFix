@@ -53,6 +53,8 @@ export function ProviderBooking({
     }
   };
 
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     fetchBookedTimes();
   }, [selectedDate]);

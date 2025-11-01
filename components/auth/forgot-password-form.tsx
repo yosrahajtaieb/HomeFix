@@ -58,9 +58,9 @@ export function ForgotPasswordForm() {
         </div>
         <h2 className="text-2xl font-bold mb-2">Check Your Email</h2>
         <p className="text-gray-600 mb-4">
-          We've sent a password reset link to <strong>{email}</strong>
+          We&apos;ve sent a password reset link to <strong>{email}</strong>
         </p>
-        <p className="text-gray-600 mb-6">If you don't see it, please check your spam folder.</p>
+        <p className="text-gray-600 mb-6">If you don&apos;t see it, please check your spam folder.</p>
         <Link
           href="/login"
           className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary/90"

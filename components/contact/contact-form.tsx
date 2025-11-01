@@ -88,7 +88,7 @@ export function ContactForm() {
         <div className="bg-green-50 border border-green-200 rounded-lg p-6 text-center">
           <CheckCircle className="h-12 w-12 text-green-500 mx-auto mb-4" />
           <h3 className="text-xl font-bold text-green-800 mb-2">Message Sent!</h3>
-          <p className="text-green-700">Thank you for contacting us. We'll get back to you as soon as possible.</p>
+          <p className="text-green-700">Thank you for contacting us. We&apos;ll get back to you as soon as possible.</p>
         </div>
       ) : (
         <form onSubmit={handleSubmit} className="space-y-6">

@@ -33,6 +33,8 @@ export default function AdminUsersTable() {
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const supabase = createClient();
 
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     fetchUsers();
   }, []);

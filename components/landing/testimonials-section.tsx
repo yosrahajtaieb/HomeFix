@@ -19,7 +19,7 @@ export function TestimonialsSection({ testimonials }: TestimonialsSectionProps) 
       <div className="container mx-auto px-4 sm:px-6">
         <div className="text-center mb-12">
           <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">What Our Customers Say</h2>
-          <p className="mt-4 text-lg text-gray-600">Don't just take our word for it</p>
+          <p className="mt-4 text-lg text-gray-600">Don&apos;t just take our word for it</p>
         </div>
         <div className="grid md:grid-cols-3 gap-8">
           {testimonials.map((testimonial, index) => (
@@ -29,7 +29,7 @@ export function TestimonialsSection({ testimonials }: TestimonialsSectionProps) 
                   <Star key={i} className={`h-5 w-5 ${i < testimonial.rating ? "fill-current" : ""}`} />
                 ))}
               </div>
-              <p className="text-gray-700 mb-4">"{testimonial.text}"</p>
+              <p className="text-gray-700 mb-4">&quot;{testimonial.text}&quot;</p>
               <div className="flex items-center">
                 <Image
                   src={testimonial.image || "/placeholder.svg"}
