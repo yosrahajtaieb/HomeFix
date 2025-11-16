@@ -1,7 +1,5 @@
 "use client"
 
-"use client"
-
 import type React from "react"
 import { useRef, useState, useEffect } from "react"
 import { createClient } from "@/utils/supabase/client"
@@ -18,7 +16,7 @@ import { Footer } from "@/components/landing/footer"
 
 // Import data
 import { serviceCategories } from "@/data/service-categories"
-//import { featuredProviders } from "@/data/providers"
+
 
 
 // Define the Testimonial type
