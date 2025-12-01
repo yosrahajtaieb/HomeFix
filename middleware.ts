@@ -66,7 +66,8 @@ export async function middleware(request: NextRequest) {
     '/resources', 
     '/faq', 
     '/terms', 
-    '/privacy'
+    '/privacy',
+    '/api/chat'
   ]
   
   // Auth pages that should redirect if user is already logged in
