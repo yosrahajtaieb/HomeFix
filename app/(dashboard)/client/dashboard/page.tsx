@@ -31,7 +31,7 @@ export default function ClientDashboardPage() {
         return;
       }
 
-      // Fetch client info
+     
       const { data: clientData } = await supabase
         .from("clients")
         .select("*")
@@ -39,7 +39,7 @@ export default function ClientDashboardPage() {
         .single();
       setClient(clientData);
 
-      // Fetch bookings with provider info
+      
       const { data: bookingsData, error } = await supabase
         .from("bookings")
         .select("*, providers(name, category)")

@@ -67,7 +67,7 @@ export default function ServiceCategoryPage({ params, searchParams }: Props) {
               ...provider,
               rating: parseFloat(averageRating.toFixed(1)),
               reviewCount: reviewCount,
-              startingPrice: provider.starting_price || 0, // Map starting_price
+              startingPrice: provider.starting_price || 0, 
               image: provider.image || "/placeholder1.svg",
             }
           })
@@ -87,25 +87,25 @@ export default function ServiceCategoryPage({ params, searchParams }: Props) {
     fetchProviders()
   }, [category, categoryDetails])
 
-  // Apply filters whenever search/location/sort changes
+ 
   useEffect(() => {
     let result = [...providers]
 
-    // Filter by search term (name)
+    
     if (searchTerm) {
       result = result.filter((provider) =>
         provider.name.toLowerCase().includes(searchTerm.toLowerCase())
       )
     }
 
-    // Filter by location
+   
     if (locationFilter) {
       result = result.filter((provider) =>
         provider.location?.toLowerCase().includes(locationFilter.toLowerCase())
       )
     }
 
-    // Sort providers
+   
     switch (sortBy) {
       case "rating":
         result.sort((a, b) => b.rating - a.rating)
@@ -117,7 +117,7 @@ export default function ServiceCategoryPage({ params, searchParams }: Props) {
         result.sort((a, b) => b.reviewCount - a.reviewCount)
         break
       default:
-        // "recommended" - keep original order or custom logic
+       
         break
     }
 

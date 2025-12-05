@@ -38,7 +38,6 @@ export function AiChatbot() {
     },
   });
 
-  // Check if user is a provider and update welcome message
   useEffect(() => {
     const checkUserRole = async () => {
       const supabase = createClient();
@@ -52,7 +51,6 @@ export function AiChatbot() {
           .maybeSingle();
         
         if (providerData) {
-          // Update the welcome message for providers
           setMessages([
             {
               id: "welcome",
@@ -69,7 +67,6 @@ export function AiChatbot() {
       }
     };
 
-    // Check immediately and when chat opens
     if (isOpen) {
       checkUserRole();
     }
@@ -81,11 +78,10 @@ export function AiChatbot() {
     setInput(e.target.value);
   };
 
-  // Function to remove markdown formatting (bold ** and italic *)
-  const stripMarkdown = (text: string) => {
+ const stripMarkdown = (text: string) => {
     return text
-      .replace(/\*\*([^*]+)\*\*/g, '$1') // Remove bold **text**
-      .replace(/\*([^*]+)\*/g, '$1');     // Remove italic *text*
+      .replace(/\*\*([^*]+)\*\*/g, '$1') 
+      .replace(/\*([^*]+)\*/g, '$1');    
   };
 
   const handleSubmit = async (e: React.FormEvent) => {

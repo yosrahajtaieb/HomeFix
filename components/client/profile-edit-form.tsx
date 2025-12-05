@@ -22,7 +22,7 @@ export function ClientProfileEditForm() {
     confirmPassword: "",
   })
 
-  // Fetch real client data on mount
+ 
   useEffect(() => {
     const fetchClient = async () => {
       const supabase = createClient()
@@ -92,7 +92,7 @@ export function ClientProfileEditForm() {
         setIsSubmitting(false)
         return
       }
-      // Only update address and phone
+    
       const { error } = await supabase
         .from("clients")
         .update({
@@ -100,7 +100,7 @@ export function ClientProfileEditForm() {
           phone: formData.phone,
         })
         .eq("id", session.user.id)
-      // Update password if provided
+     
       if (!error && formData.password) {
         const { error: pwError } = await supabase.auth.updateUser({ password: formData.password })
         if (pwError) {

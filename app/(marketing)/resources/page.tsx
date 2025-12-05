@@ -1,4 +1,4 @@
-// app/resources/page.tsx
+
 import { Header } from "@/components/landing/header"
 import { Footer } from "@/components/landing/footer"
 

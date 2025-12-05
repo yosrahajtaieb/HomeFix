@@ -56,8 +56,7 @@ export async function middleware(request: NextRequest) {
 
   const { data: { user } } = await supabase.auth.getUser()
 
-  // List of public routes that don't require authentication
-  const publicRoutes = [
+ const publicRoutes = [
     '/', 
     '/about', 
     '/services',
@@ -70,22 +69,20 @@ export async function middleware(request: NextRequest) {
     '/api/chat'
   ]
   
-  // Auth pages that should redirect if user is already logged in
-  const authPages = ['/login', '/signup', '/forgot-password']
+ const authPages = ['/login', '/signup', '/forgot-password']
   const isAuthPage = authPages.includes(pathname)
   
-  // Dashboard routes
+ 
   const dashboardRoutes = ['/client/dashboard', '/provider/dashboard', '/admin/dashboard']
   const isDashboardRoute = dashboardRoutes.some(route => pathname.startsWith(route))
   
-  // Check if the current path is a public route
+  
   const isPublicRoute = publicRoutes.some(route => 
     pathname === route || pathname.startsWith(`${route}/`)
   )
 
-  // If user is authenticated and trying to access auth pages (login/signup)
-  if (user && isAuthPage) {
-    // Check user role and redirect to appropriate dashboard
+ if (user && isAuthPage) {
+   
     const { data: clientData } = await supabase
       .from("clients")
       .select("id")
@@ -104,7 +101,7 @@ export async function middleware(request: NextRequest) {
       .eq("id", user.id)
       .maybeSingle();
 
-    // Redirect to appropriate dashboard
+   
     if (clientData) {
       return NextResponse.redirect(new URL("/client/dashboard", request.url));
     } else if (providerData) {
@@ -114,16 +111,14 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  // If user is not authenticated and trying to access protected routes
-  if (!user && isDashboardRoute) {
-    // Allow admin login page
+ if (!user && isDashboardRoute) {
+   
     if (pathname === "/admin/login") {
       return response;
     }
     return NextResponse.redirect(new URL("/login", request.url));
   }
 
-  // If user is not authenticated and trying to access other protected routes
   if (!user && !isPublicRoute && !isAuthPage && pathname !== "/admin/login") {
     return NextResponse.redirect(new URL("/login", request.url));
   }

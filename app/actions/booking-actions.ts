@@ -6,7 +6,7 @@ export async function sendProviderBookingNotification(bookingId: string) {
   const { createClient } = await import("@/utils/supabase/server");
   const supabase = await createClient();
 
-  // Fetch complete booking details
+  
   const { data: booking } = await supabase
     .from("bookings")
     .select(`
@@ -21,7 +21,7 @@ export async function sendProviderBookingNotification(bookingId: string) {
     return { success: false, error: "Booking not found" };
   }
 
-  // Format date
+  
   const formattedDate = new Date(booking.date).toLocaleDateString("en-US", {
     weekday: "long",
     month: "long",
@@ -29,7 +29,7 @@ export async function sendProviderBookingNotification(bookingId: string) {
     year: "numeric",
   });
 
-  // Send email
+  
   return await sendBookingEmail("providerNewBooking", booking.providers.email, {
     providerName: booking.providers.name,
     clientName: `${booking.clients.first_name} ${booking.clients.last_name}`,
@@ -40,7 +40,7 @@ export async function sendProviderBookingNotification(bookingId: string) {
   });
 }
 
-// ← ADD THIS NEW FUNCTION
+
 export async function sendClientBookingStatusUpdate(
   bookingId: string,
   status: "confirmed" | "rejected" | "completed",
@@ -49,7 +49,7 @@ export async function sendClientBookingStatusUpdate(
   const { createClient } = await import("@/utils/supabase/server");
   const supabase = await createClient();
 
-  // Fetch complete booking details
+ 
   const { data: booking } = await supabase
     .from("bookings")
     .select(`
@@ -64,7 +64,7 @@ export async function sendClientBookingStatusUpdate(
     return { success: false, error: "Booking not found" };
   }
 
-  // Format date
+  
   const formattedDate = new Date(booking.date).toLocaleDateString("en-US", {
     weekday: "long",
     month: "long",
@@ -72,7 +72,7 @@ export async function sendClientBookingStatusUpdate(
     year: "numeric",
   });
 
-  // Send appropriate email based on status
+  
   let emailType: "clientBookingConfirmed" | "clientBookingRejected" | "clientBookingCompleted";
   
   if (status === "confirmed") {
@@ -89,6 +89,6 @@ export async function sendClientBookingStatusUpdate(
     service: booking.providers.category,
     date: formattedDate,
     time: booking.time,
-    reason: reason, // Only used for rejected emails
+    reason: reason, 
   });
 }

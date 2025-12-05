@@ -61,11 +61,11 @@ export default function AdminBookingsTable() {
     fetchBookings();
   }, []);
   
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+  
   const fetchBookings = async () => {
     setLoading(true);
 
-    // Fetch all bookings
+  
     const { data: bookingsData, error: bookingsError } = await supabase
       .from("bookings")
       .select("*")
@@ -77,31 +77,31 @@ export default function AdminBookingsTable() {
       return;
     }
 
-    // Fetch all clients with all required fields
+ 
     const { data: clients } = await supabase
       .from("clients")
       .select("id, first_name, last_name, email, phone, address");
 
-    // Fetch all providers with all required fields
+    
     const { data: providers } = await supabase
       .from("providers")
       .select("id, name, category, starting_price, email, phone, location");
 
-    // Fetch all reviews
+  
     const { data: reviews } = await supabase
       .from("reviews")
       .select("provider_id, client_id, rating, comment, date");
 
-    // Create lookup maps
+    
     const clientMap = new Map(clients?.map((c) => [c.id, c]) || []);
     const providerMap = new Map(providers?.map((p) => [p.id, p]) || []);
 
-    // Create review lookup map with composite key
+    
     const reviewMap = new Map(
       reviews?.map((r) => [`${r.client_id}_${r.provider_id}`, r]) || []
     );
 
-    // Merge data
+   
     const enrichedBookings =
       bookingsData?.map((booking) => ({
         ...booking,
@@ -121,7 +121,7 @@ export default function AdminBookingsTable() {
       .eq("id", id);
 
     if (!error) {
-      // ← ADD THIS: Send confirmation email to client
+    
       sendClientBookingStatusUpdate(id, "confirmed").then((result) => {
         if (result.success) {
           console.log("✅ Client confirmation email sent");
@@ -150,7 +150,7 @@ export default function AdminBookingsTable() {
       .eq("id", id);
 
     if (!error) {
-      // ← ADD THIS: Send rejection email to client with reason
+      
       sendClientBookingStatusUpdate(id, "rejected", reason).then((result) => {
         if (result.success) {
           console.log("✅ Client rejection email sent");
@@ -187,7 +187,7 @@ export default function AdminBookingsTable() {
       .eq("id", id);
 
     if (!error) {
-      // ← ADD THIS: Send completion email to client
+     
       sendClientBookingStatusUpdate(id, "completed").then((result) => {
         if (result.success) {
           console.log("✅ Client completion email sent");
@@ -206,8 +206,7 @@ export default function AdminBookingsTable() {
     }
   };
 
-  // Use useMemo to recalculate when dependencies change
-    // Use useMemo to recalculate when dependencies change
+
   const filteredBookings = useMemo(() => {
     const filtered = bookings.filter((booking) => {
       const clientName = booking.client
@@ -227,15 +226,14 @@ export default function AdminBookingsTable() {
       return matchesSearch && matchesStatus;
     });
 
-    // Sort the filtered results
+ 
     const sorted = [...filtered].sort((a, b) => {
-      // Parse date and time
+    
       const dateA = new Date(a.date);
       const dateB = new Date(b.date);
       
-      // If dates are the same, compare times
+    
       if (dateA.getTime() === dateB.getTime()) {
-        // Parse time strings (assuming format like "14:30" or "2:30 PM")
         const [hoursA, minutesA] = a.time.split(':').map(num => parseInt(num));
         const [hoursB, minutesB] = b.time.split(':').map(num => parseInt(num));
         
@@ -245,7 +243,7 @@ export default function AdminBookingsTable() {
         return sortOrder === "latest" ? timeB - timeA : timeA - timeB;
       }
       
-      // Compare dates
+ 
       return sortOrder === "latest" 
         ? dateB.getTime() - dateA.getTime() 
         : dateA.getTime() - dateB.getTime();
@@ -277,7 +275,7 @@ export default function AdminBookingsTable() {
 
   return (
     <div className="bg-white rounded-lg shadow-sm border border-black overflow-hidden">
-      {/* Filters */}
+      
       <div className="p-4 border-b border-black">
         <div className="flex flex-col md:flex-row gap-4">
           <div className="flex-1 relative">

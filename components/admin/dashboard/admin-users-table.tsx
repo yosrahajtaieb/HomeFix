@@ -34,7 +34,7 @@ export default function AdminUsersTable() {
   const supabase = createClient();
 
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+
   useEffect(() => {
     fetchUsers();
   }, []);

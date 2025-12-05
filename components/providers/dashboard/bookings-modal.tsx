@@ -30,7 +30,7 @@ export function BookingsModal({
 
   if (!isOpen) return null;
 
-  // Filter bookings based on selected status
+  
   const filteredBookings =
     filterStatus === "all"
       ? bookings

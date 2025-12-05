@@ -25,7 +25,7 @@ export async function sendBookingEmail(
   to: string,
   data: EmailData
 ) {
-  // Check if emails are enabled (optional feature flag)
+  
   const emailEnabled = process.env.EMAIL_ENABLED !== "false";
   
   if (!emailEnabled) {
@@ -33,18 +33,18 @@ export async function sendBookingEmail(
     return { success: false, error: "Email disabled" };
   }
 
-  // Validate recipient email
+
   if (!to || !to.includes("@")) {
     console.error("Invalid recipient email:", to);
     return { success: false, error: "Invalid email address" };
   }
 
   try {
-    // Get the email content based on type
+ 
     const emailContent = getEmailContent(type, data);
     
     const result = await resend.emails.send({
-      from: "HomeFix <noreply@homefix.support>", // Use verified domain later
+      from: "HomeFix <noreply@homefix.support>", 
       to: [to],
       subject: emailContent.subject,
       html: emailContent.html,

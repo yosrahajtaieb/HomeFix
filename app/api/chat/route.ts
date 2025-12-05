@@ -14,10 +14,10 @@ export async function POST(req: Request) {
   const { messages } = await req.json();
   console.log("Messages received:", messages?.length);
 
-  // Convert UIMessages to ModelMessages
+  
   const modelMessages = convertToModelMessages(messages);
 
-  // Get current user and check if they're a provider
+
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   
@@ -78,8 +78,7 @@ export async function POST(req: Request) {
           if (isVerified !== undefined) {
             query = query.eq('approved', isVerified);
           }
-          
-          // Always filter active providers
+        
           query = query.eq('active', true);
 
           const { data, error } = await query.limit(5);
@@ -100,7 +99,7 @@ export async function POST(req: Request) {
           dateRange: z.enum(['today', 'this_week', 'this_month', 'upcoming']).optional().describe('Date range filter: today, this_week, this_month, or upcoming (future bookings)'),
         }),
         execute: async ({ date, status, dateRange }) => {
-          // Check if user is a provider
+        
           if (!isProvider || !providerId) {
             return {
               error: 'You must be logged in as a provider to view your schedule. Please log in to your provider account.',
@@ -129,7 +128,7 @@ export async function POST(req: Request) {
             .eq('provider_id', providerId)
             .order('date', { ascending: true });
 
-          // Apply date filter
+      
           if (date) {
             query = query.eq('date', date);
           } else if (dateRange) {
@@ -166,7 +165,7 @@ export async function POST(req: Request) {
             }
           }
 
-          // Apply status filter
+       
           if (status && status.length > 0) {
             query = query.in('status', status);
           }

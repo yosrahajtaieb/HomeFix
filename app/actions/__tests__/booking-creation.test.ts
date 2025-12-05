@@ -1,11 +1,11 @@
 import { describe, it, expect, jest, beforeEach } from '@jest/globals';
 
-// Mock Supabase
+
 jest.mock('@/utils/supabase/client', () => ({
   createClient: jest.fn(),
 }));
 
-// Mock email service
+
 jest.mock('@/lib/email-service', () => ({
   sendBookingEmail: jest.fn(),
 }));
@@ -39,7 +39,7 @@ describe('Booking Creation - Full Flow', () => {
     mockCreateClient.mockReturnValue(mockSupabase);
   });
 
-  // TEST 1: Happy Path
+  
   it('should create booking, save to database, and send email notification', async () => {
     const mockSession = { user: { id: 'client-123' } };
     const mockBookingData = {
@@ -72,16 +72,16 @@ describe('Booking Creation - Full Flow', () => {
     expect(mockSupabase.from).toHaveBeenCalledWith('bookings');
   });
 
-    // TEST 2: Double Booking Prevention - Identifies booked slots
+   
   it('should correctly identify already booked time slots', async () => {
-    // ARRANGE
+   
     const existingBookings = [
       { time: '10:00 AM' },
       { time: '2:00 PM' },
       { time: '4:00 PM' }
     ];
 
-    // Reset and reconfigure the mock for this test
+   
     (mockSupabase.from) = jest.fn().mockReturnValue({
       select: jest.fn().mockReturnValue({
         eq: jest.fn().mockReturnValue({
@@ -90,7 +90,7 @@ describe('Booking Creation - Full Flow', () => {
       })
     });
 
-    // ACT - Fetch booked times (simulating fetchBookedTimes function)
+    
     const result = await mockSupabase
       .from('bookings')
       .select('time')
@@ -99,13 +99,13 @@ describe('Booking Creation - Full Flow', () => {
 
     const bookedTimes = result.data?.map((b: any) => b.time) || [];
 
-    // ASSERT
+    
     expect(mockSupabase.from).toHaveBeenCalledWith('bookings');
     expect(bookedTimes).toEqual(['10:00 AM', '2:00 PM', '4:00 PM']);
     expect(bookedTimes.includes('10:00 AM')).toBe(true);
     expect(bookedTimes.includes('11:00 AM')).toBe(false);
   });
-  // TEST 3: Invalid Data Rejection
+  
   it('should reject booking with missing required fields', async () => {
     mockSupabase.single.mockResolvedValue({
       data: null,
@@ -130,7 +130,7 @@ describe('Booking Creation - Full Flow', () => {
 
 
 
-  // TEST 4: Database Failure - No Email
+  
   it('should not send email if database insert fails', async () => {
     mockSupabase.single.mockResolvedValue({
       data: null,
@@ -153,7 +153,7 @@ describe('Booking Creation - Full Flow', () => {
     expect(mockSendBookingEmail).not.toHaveBeenCalled();
   });
 
-  // TEST 5: Email Failure - Booking Persists
+  
   it('should keep booking even if email notification fails', async () => {
     const mockBookingData = {
       id: 'booking-789',

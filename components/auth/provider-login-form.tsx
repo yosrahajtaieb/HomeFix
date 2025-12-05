@@ -45,24 +45,19 @@ export function ProviderLoginForm() {
     setErrors({})
 
     try {
-      // Create a FormData object to pass to the server action
       const formData = new FormData()
       formData.append('email', email)
       formData.append('password', password)
 
-      // Call the server action
       const result = await providerLogin(formData)
 
-      // Make sure to check result properly
       if (result && result.success === true) {
         setIsSuccess(true)
-        // Redirect after showing success message
         setTimeout(() => {
           router.push("/provider/dashboard")
-          router.refresh() // Refresh the page to update auth state
+          router.refresh() 
         }, 1500)
       } else {
-        // Show the error message from Supabase
         setErrors({ form: result?.error || "Invalid email or password. Please try again." })
       }
     } catch (error) {

@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { ProviderProfile } from "@/components/providers/profile/provider-profile"
-import { Header } from "@/components/landing/header" // Add this import
+import { Header } from "@/components/landing/header" 
 import { createClient } from "@/utils/supabase/client"
 
 export default function ProviderPage({ params }: { params: { id: string } }) {

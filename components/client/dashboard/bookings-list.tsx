@@ -9,7 +9,7 @@ type BookingsListProps = {
 };
 
 export function BookingsList({ bookings, onViewAll }: BookingsListProps) {
-  // Show only upcoming bookings (pending + confirmed)
+ 
   const upcomingBookings = bookings.filter(
     (b) => b.status === "pending" || b.status === "confirmed"
   );

@@ -1,10 +1,10 @@
-// components/providers/provider-booking.tsx
+
 "use client";
 
 import { useState, useEffect } from "react";
 import { CalendarIcon, Star } from "lucide-react";
 import { createClient } from "@/utils/supabase/client";
-import { sendProviderBookingNotification } from "@/app/actions/booking-actions"; // ← CHANGE THIS
+import { sendProviderBookingNotification } from "@/app/actions/booking-actions"; 
 
 type Provider = {
   id: number;
@@ -54,7 +54,7 @@ export function ProviderBooking({
   };
 
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+  
   useEffect(() => {
     fetchBookedTimes();
   }, [selectedDate]);
@@ -122,7 +122,7 @@ const handleBooking = async (e: React.FormEvent) => {
       return;
     }
 
-    // Insert booking
+   
     const { data: bookingData, error } = await supabase
       .from("bookings")
       .insert({
@@ -138,7 +138,7 @@ const handleBooking = async (e: React.FormEvent) => {
     setSubmitting(false);
 
     if (!error && bookingData) {
-      // ← REPLACE all the email sending code with this:
+     
       sendProviderBookingNotification(bookingData.id).then((result) => {
         if (result.success) {
           console.log("✅ Provider notification email sent");

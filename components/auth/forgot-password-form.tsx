@@ -37,10 +37,10 @@ export function ForgotPasswordForm() {
     setErrors({})
 
     try {
-      // Simulate API call for password reset
+      
       await new Promise((resolve) => setTimeout(resolve, 1500))
 
-      // Simulate successful password reset request
+
       setIsSuccess(true)
     } catch (error) {
       console.error("Password reset error:", error)

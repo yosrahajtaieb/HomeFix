@@ -19,7 +19,7 @@ export function ProviderProfileEditForm() {
     available_from: "",
     password: "",
     confirmPassword: "",
-    // For display only:
+    
     name: "",
     email: "",
     category: "",
@@ -118,7 +118,7 @@ export function ProviderProfileEditForm() {
         setIsSubmitting(false);
         return;
       }
-      // Update provider fields
+     
       const { error } = await supabase
         .from("providers")
         .update({
@@ -131,7 +131,7 @@ export function ProviderProfileEditForm() {
           available_from: formData.available_from,
         })
         .eq("id", session.user.id);
-      // Update password if provided
+     
       if (!error && formData.password) {
         const { error: pwError } = await supabase.auth.updateUser({
           password: formData.password,

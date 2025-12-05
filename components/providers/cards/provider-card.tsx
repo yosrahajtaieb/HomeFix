@@ -12,8 +12,8 @@ type ProviderCardProps = {
   location: string
   startingPrice: number
   available_from: string
-  categoryId?: string  // Optional - only needed if showing category link
-  category?: string    // Optional - only needed if showing category link
+  categoryId?: string 
+  category?: string    
 }
 
 export function ProviderCard({

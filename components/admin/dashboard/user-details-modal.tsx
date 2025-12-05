@@ -10,7 +10,7 @@ import {
   Calendar,
   AlertTriangle,
   CheckCircle,
-  ShoppingBag, // ← ADD THIS
+  ShoppingBag, 
 } from "lucide-react";
 
 type User = {
@@ -22,7 +22,7 @@ type User = {
   address: string;
   created_at: string;
   active: boolean;
-  bookings_count?: number; // ← ADD THIS
+  bookings_count?: number;
 };
 
 type UserDetailsModalProps = {
