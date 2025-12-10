@@ -8,7 +8,7 @@ type RecentReviewsProps = {
 };
 
 export function RecentReviews({ reviews, onViewAll }: RecentReviewsProps) {
-  // Show only the 3 most recent reviews
+
   const recentReviews = reviews.slice(0, 3);
 
   return (

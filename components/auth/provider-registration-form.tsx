@@ -39,7 +39,7 @@ export function ProviderRegistrationForm({
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
 
-    // Clear error when field is edited
+    
     if (errors[name]) {
       setErrors((prev) => {
         const newErrors = { ...prev };
@@ -95,8 +95,7 @@ export function ProviderRegistrationForm({
     setIsSubmitting(true);
 
     try {
-      // Create a FormData object with all provider information
-      const formDataObj = new FormData();
+     const formDataObj = new FormData();
       formDataObj.append("email", formData.email);
       formDataObj.append("password", formData.password);
       formDataObj.append("name", formData.name);
@@ -107,12 +106,11 @@ export function ProviderRegistrationForm({
       formDataObj.append("startingPrice", formData.startingPrice);
       formDataObj.append("available_from", formData.available_from);
 
-      // Call the server action
-      const result = await providerSignup(formDataObj);
+       const result = await providerSignup(formDataObj);
 
       if (result.success) {
         setIsSuccess(true);
-        // Redirect after showing success message
+        
         setTimeout(() => {
           router.push("/provider/dashboard");
         }, 2000);

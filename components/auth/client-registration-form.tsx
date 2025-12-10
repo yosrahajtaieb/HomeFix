@@ -31,7 +31,7 @@ export function ClientRegistrationForm({ onBack }: ClientRegistrationFormProps) 
     const { name, value } = e.target
     setFormData((prev) => ({ ...prev, [name]: value }))
 
-    // Clear error when field is edited
+   
     if (errors[name]) {
       setErrors((prev) => {
         const newErrors = { ...prev }
@@ -74,7 +74,7 @@ export function ClientRegistrationForm({ onBack }: ClientRegistrationFormProps) 
     setIsSubmitting(true)
 
     try {
-      // Create a FormData object with all client information
+     
       const formDataObj = new FormData()
       formDataObj.append('email', formData.email)
       formDataObj.append('password', formData.password)
@@ -83,14 +83,14 @@ export function ClientRegistrationForm({ onBack }: ClientRegistrationFormProps) 
       formDataObj.append('phone', formData.phone)
       formDataObj.append('address', formData.address || '')
 
-      // Call the server action
+     
       const result = await clientSignup(formDataObj)
 
       if (result.success) {
         setIsSuccess(true)
-        // Redirect after showing success message
+     
         setTimeout(() => {
-          router.push("/client/dashboard") // or your page that lists all services
+          router.push("/client/dashboard") 
         }, 2000)
       } else {
         setErrors({ form: result.error || "Registration failed. Please try again." })

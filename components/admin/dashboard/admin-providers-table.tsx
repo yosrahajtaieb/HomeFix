@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Search, User, ChevronDown } from "lucide-react";
 import { createClient } from "@/utils/supabase/client";
 import { ProviderDetailsModal } from "./provider-details-modal";
@@ -39,14 +39,12 @@ export default function AdminProvidersTable() {
   const supabase = createClient();
 
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  useEffect(() => {
-    fetchProviders();
-  }, []);
+  
+ 
 
   
 
-    const fetchProviders = async () => {
+    const fetchProviders = useCallback(async () => {
     setLoading(true);
 
     const { data: providersData, error } = await supabase
@@ -60,23 +58,21 @@ export default function AdminProvidersTable() {
       return;
     }
 
-    // Fetch completed jobs count and average rating for each provider
+   
     const providersWithStats = await Promise.all(
       (providersData || []).map(async (provider) => {
-        // Count completed jobs
+        
         const { count } = await supabase
           .from("bookings")
           .select("*", { count: "exact", head: true })
           .eq("provider_id", provider.id)
-          .eq("status", "completed"); // ← CHANGED from "confirmed" to "completed"
-
-        // Get average rating from reviews
+          .eq("status", "completed"); 
         const { data: reviews } = await supabase
           .from("reviews")
           .select("rating")
           .eq("provider_id", provider.id);
 
-        // Calculate average rating
+        
         let average_rating = 0;
         if (reviews && reviews.length > 0) {
           const sum = reviews.reduce((acc, review) => acc + review.rating, 0);
@@ -93,7 +89,11 @@ export default function AdminProvidersTable() {
 
     setProviders(providersWithStats);
     setLoading(false);
-  };
+  }, [supabase]);
+
+useEffect(() => {
+  fetchProviders();
+}, [fetchProviders]);
 
   const handleSuspend = async (id: string, activate: boolean) => {
     const { error } = await supabase
@@ -139,7 +139,7 @@ export default function AdminProvidersTable() {
     return active ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800";
   };
 
-  // Get unique categories for filter
+
   const categories = Array.from(new Set(providers.map((p) => p.category)));
 
   if (loading) {

@@ -3,7 +3,7 @@
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/utils/supabase/server'
 
-// In your login function:
+
 
 export async function clientLogin(formData: FormData) {
   const supabase = await createClient()
@@ -19,20 +19,20 @@ export async function clientLogin(formData: FormData) {
     return { success: false, error: error.message }
   }
 
-  // Check if user exists in clients table AND is active
+  
   const { data: clientData } = await supabase
     .from('clients')
-    .select('id, active') // ← ADD active field
+    .select('id, active') 
     .eq('id', authData.user.id)
     .maybeSingle()
 
   if (!clientData) {
-    // Not a client, sign out and show error
+    
     await supabase.auth.signOut()
     return { success: false, error: "This account is not registered as a client." }
   }
 
-  // ← ADD THIS: Check if account is suspended
+ 
   if (!clientData.active) {
     await supabase.auth.signOut()
     return { 
@@ -58,20 +58,19 @@ export async function providerLogin(formData: FormData) {
     return { success: false, error: error.message }
   }
 
-  // Check if user exists in providers table AND is active
   const { data: providerData } = await supabase
     .from('providers')
-    .select('id, active') // ← ADD active field
+    .select('id, active')
     .eq('id', authData.user.id)
     .maybeSingle()
 
   if (!providerData) {
-    // Not a provider, sign out and show error
+   
     await supabase.auth.signOut()
     return { success: false, error: "This account is not registered as a provider." }
   }
 
-  // ← ADD THIS: Check if account is suspended
+  
   if (!providerData.active) {
     await supabase.auth.signOut()
     return { 
@@ -96,7 +95,7 @@ export async function adminLogin(formData: FormData) {
     return { success: false, error: error.message }
   }
 
-  // Check if user exists in admins table
+ 
   const { data: adminData } = await supabase
     .from('admins')
     .select('id')
@@ -114,7 +113,7 @@ export async function adminLogin(formData: FormData) {
   export async function clientSignup(formData: FormData) {
     const supabase = await createClient()
   
-    // Parse form data
+   
     const email = formData.get('email') as string
     const password = formData.get('password') as string
     const firstName = formData.get('firstName') as string
@@ -122,7 +121,7 @@ export async function adminLogin(formData: FormData) {
     const phone = formData.get('phone') as string
     const address = formData.get('address') as string
   
-    // Sign up user with Supabase Auth
+   
     const { data: authData, error: authError } = await supabase.auth.signUp({
       email,
       password,
@@ -136,7 +135,7 @@ export async function adminLogin(formData: FormData) {
       }
     }
   
-    // Insert user details into clients table
+    
     const { error: insertError } = await supabase
       .from('clients')
       .insert({
@@ -150,7 +149,7 @@ export async function adminLogin(formData: FormData) {
   
     if (insertError) {
       console.error("Client data insert error:", insertError.message)
-      // You might want to delete the auth user if this fails
+      
       return { 
         success: false, 
         error: "Failed to create client profile. Please try again." 
@@ -165,7 +164,7 @@ export async function adminLogin(formData: FormData) {
   export async function providerSignup(formData: FormData) {
     const supabase = await createClient()
   
-    // Parse form data
+ 
     const email = formData.get('email') as string
     const password = formData.get('password') as string
     const name = formData.get('name') as string
@@ -176,7 +175,7 @@ export async function adminLogin(formData: FormData) {
     const startingPrice = formData.get('startingPrice') as string
     const available_from = formData.get('available_from') as string
   
-    // Sign up user with Supabase Auth
+   
     const { data: authData, error: authError } = await supabase.auth.signUp({
       email,
       password,
@@ -190,7 +189,7 @@ export async function adminLogin(formData: FormData) {
       }
     }
   
-    // Insert user details into providers table
+    
     const { error: insertError } = await supabase
       .from('providers')
       .insert({
@@ -203,12 +202,12 @@ export async function adminLogin(formData: FormData) {
         description,
         starting_price: parseFloat(startingPrice),
         available_from,
-        approved: false // Providers start as unapproved
+        approved: false 
       })
   
     if (insertError) {
       console.error("Provider data insert error:", insertError.message)
-      // You might want to delete the auth user if this fails
+      
       return { 
         success: false, 
         error: "Failed to create provider profile. Please try again." 

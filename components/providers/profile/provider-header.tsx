@@ -1,4 +1,4 @@
-// components/providers/provider-header.tsx
+
 import Image from "next/image";
 import { MapPin, Star, DollarSign, CheckCircle } from "lucide-react";
 

@@ -16,8 +16,7 @@ export function ServiceSearchBar() {
     e.preventDefault()
 
     if (category) {
-      // In a real app, you might want to include the date in the query params
-      router.push(`/services/${category}${date ? `?date=${date}` : ""}`)
+     router.push(`/services/${category}${date ? `?date=${date}` : ""}`)
     }
   }
 

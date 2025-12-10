@@ -11,7 +11,7 @@ import AdminProvidersTable from "@/components/admin/dashboard/admin-providers-ta
 export default async function AdminDashboardPage() {
   const supabase = await createClient();
   
-  // Use getUser() instead of getSession() for security
+
   const {
     data: { user },
     error: userError,
@@ -19,11 +19,11 @@ export default async function AdminDashboardPage() {
 
  
   if (!user) {
-    console.log("No user, redirecting to login"); // DEBUG
+    console.log("No user, redirecting to login");
     redirect("/login");
   }
 
-  // Check if user is an admin
+ 
   const { data: adminData, error: adminError } = await supabase
     .from("admins")
     .select("id, email, is_superadmin")
@@ -32,7 +32,7 @@ export default async function AdminDashboardPage() {
 
  
   if (!adminData) {
-    console.log("Not an admin, redirecting to home"); // DEBUG
+    console.log("Not an admin, redirecting to home"); 
     redirect("/");
   }
 

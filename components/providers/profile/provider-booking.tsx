@@ -1,10 +1,10 @@
-// components/providers/provider-booking.tsx
+
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { CalendarIcon, Star } from "lucide-react";
 import { createClient } from "@/utils/supabase/client";
-import { sendProviderBookingNotification } from "@/app/actions/booking-actions"; // ← CHANGE THIS
+import { sendProviderBookingNotification } from "@/app/actions/booking-actions"; 
 
 type Provider = {
   id: number;
@@ -35,7 +35,7 @@ export function ProviderBooking({
   const [reviewSubmitted, setReviewSubmitted] = useState(false);
   const [bookedTimes, setBookedTimes] = useState<string[]>([]);
 
-  const fetchBookedTimes = async (date = selectedDate) => {
+  const fetchBookedTimes = useCallback(async (date = selectedDate) => {
     if (!date) {
       setBookedTimes([]);
       return;
@@ -51,13 +51,14 @@ export function ProviderBooking({
     if (data) {
       setBookedTimes(data.map((b: any) => b.time));
     }
-  };
+  }, [selectedDate, provider.id]);
 
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+
+  
   useEffect(() => {
     fetchBookedTimes();
-  }, [selectedDate]);
+ }, [fetchBookedTimes]);
 
   const getMinimumBookingDate = () => {
     const today = new Date().toISOString().split("T")[0];
@@ -122,7 +123,7 @@ const handleBooking = async (e: React.FormEvent) => {
       return;
     }
 
-    // Insert booking
+   
     const { data: bookingData, error } = await supabase
       .from("bookings")
       .insert({
@@ -138,7 +139,7 @@ const handleBooking = async (e: React.FormEvent) => {
     setSubmitting(false);
 
     if (!error && bookingData) {
-      // ← REPLACE all the email sending code with this:
+     
       sendProviderBookingNotification(bookingData.id).then((result) => {
         if (result.success) {
           console.log("✅ Provider notification email sent");

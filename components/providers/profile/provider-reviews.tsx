@@ -1,4 +1,4 @@
-// components/providers/provider-reviews.tsx
+
 import Image from "next/image";
 import { Star } from "lucide-react";
 

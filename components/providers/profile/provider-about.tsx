@@ -1,4 +1,4 @@
-// components/providers/provider-about.tsx
+
 type Provider = {
   name: string;
   description: string;

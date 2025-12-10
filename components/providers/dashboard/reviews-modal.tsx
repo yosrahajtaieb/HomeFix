@@ -17,13 +17,13 @@ export function ReviewsModal({ isOpen, onClose, reviews }: ReviewsModalProps) {
 
   if (!isOpen) return null;
 
-  // Filter reviews by rating
+  
   const filteredReviews =
     filterRating === "all"
       ? reviews
       : reviews.filter((r) => r.rating === filterRating);
 
-  // Sort reviews
+  
   const sortedReviews = [...filteredReviews].sort((a, b) => {
     switch (sortBy) {
       case "newest":

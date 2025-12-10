@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { createClient } from "@/utils/supabase/client";
 import { ProviderHeader } from "./provider-header";
 import { ProviderAbout } from "./provider-about";
@@ -50,7 +50,7 @@ export function ProviderProfile({
   const [userRole, setUserRole] = useState<"client" | "provider" | null>(null);
   const [authChecked, setAuthChecked] = useState(false);
 
-  const fetchReviews = async () => {
+  const fetchReviews = useCallback(async () => {
     const supabase = createClient();
     const { data, error } = await supabase
       .from("reviews")
@@ -76,9 +76,10 @@ export function ProviderProfile({
       }));
       setReviewsState(reviewsWithAuthors);
     }
-  };
+  }, [provider.id]);
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+
+
   useEffect(() => {
     fetchReviews();
 
@@ -109,7 +110,7 @@ export function ProviderProfile({
       setAuthChecked(true);
     };
     fetchUserRole();
-  }, [provider.id]);
+ }, [fetchReviews, provider.id]);
 
   return (
     <div className="container mx-auto px-4 sm:px-6 py-8">

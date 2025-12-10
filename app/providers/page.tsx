@@ -20,7 +20,7 @@ export default function AllProvidersPage() {
       .select("*");
     
     if (providersData) {
-      // Calculate ratings for each provider
+    
       const providersWithReviews = await Promise.all(
         providersData.map(async (provider) => {
           const { data: reviewsData } = await supabase
@@ -66,7 +66,7 @@ export default function AllProvidersPage() {
             <SortableProvidersGrid
               providers={providers.map((provider) => ({
                 ...provider,
-                // Map your DB fields to the props expected by AllProvidersGrid
+               
                 id: provider.id,
                 name: provider.name,
                 image: provider.image || "/placeholder1.svg",

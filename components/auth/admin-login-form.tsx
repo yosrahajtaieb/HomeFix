@@ -21,7 +21,7 @@ export function AdminLoginForm() {
       const { data: { session } } = await supabase.auth.getSession()
       
       if (session?.user) {
-        // Check if user is admin
+        
         const { data: adminData } = await supabase
           .from("admins")
           .select("id")
@@ -30,11 +30,11 @@ export function AdminLoginForm() {
         
         if (session?.user) {
           router.replace("/")
-          return // Keep loading state during redirect
+          return 
         }
       }
       
-      // Only set to false if user is NOT logged in as admin
+      
       setIsChecking(false)
     }
     
@@ -81,7 +81,7 @@ export function AdminLoginForm() {
     }
   }
 
-  // Show loading state while checking auth
+
   if (isChecking) {
     return (
       <div className="flex items-center justify-center py-12">

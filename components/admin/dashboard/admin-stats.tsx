@@ -4,46 +4,43 @@ import { Calendar, Users, Wrench, TrendingUp, CheckCircle, XCircle } from "lucid
 export default async function AdminStats() {
   const supabase = await createClient()
 
-  // Fetch total bookings this month
+ 
   const firstDayOfMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString()
   const { count: totalBookingsThisMonth } = await supabase
     .from("bookings")
     .select("*", { count: "exact", head: true })
     .gte("created_at", firstDayOfMonth)
 
-  // Fetch active providers (those who completed jobs in the last month)
   const { data: completedBookingsLastMonth } = await supabase
     .from("bookings")
     .select("provider_id")
     .eq("status", "completed")
     .gte("created_at", firstDayOfMonth)
 
-  // Get unique provider IDs who completed jobs
+  
   const activeProviderIds = new Set(
     completedBookingsLastMonth?.map(booking => booking.provider_id) || []
   )
   const activeProviders = activeProviderIds.size
 
-  // Fetch total users/clients
+
   const { count: totalUsers } = await supabase
     .from("clients")
     .select("*", { count: "exact", head: true })
 
-  // Fetch completed bookings this month
+ 
   const { count: completedBookings } = await supabase
     .from("bookings")
     .select("*", { count: "exact", head: true })
     .eq("status", "completed")
     .gte("created_at", firstDayOfMonth)
 
-  // Fetch cancelled bookings this month
   const { count: cancelledBookings } = await supabase
     .from("bookings")
     .select("*", { count: "exact", head: true })
     .eq("status", "rejected")
     .gte("created_at", firstDayOfMonth)
 
-  // Fetch most requested service (most common category from bookings)
   const { data: bookingsWithProviders } = await supabase
     .from("bookings")
     .select("provider_id")
@@ -53,7 +50,7 @@ export default async function AdminStats() {
     .from("providers")
     .select("id, category")
 
-  // Count occurrences of each category
+ 
   const categoryCount: { [key: string]: number } = {}
   const providerMap = new Map(providers?.map(p => [p.id, p.category]) || [])
   
@@ -64,7 +61,7 @@ export default async function AdminStats() {
     }
   })
 
-  // Find most requested service
+ 
   let mostRequestedService = "N/A"
   let maxCount = 0
   for (const [category, count] of Object.entries(categoryCount)) {

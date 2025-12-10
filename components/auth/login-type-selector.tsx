@@ -20,19 +20,19 @@ export function LoginTypeSelector() {
       const { data: { session } } = await supabase.auth.getSession()
       
       if (session?.user) {
-        // User is already logged in, redirect to homepage
+        
         router.replace("/")
         return
       }
       
-      // Only set to false if user is NOT logged in
+      
       setIsChecking(false)
     }
     
     checkAuth()
   }, [router])
 
-  // Show loading state while checking auth
+  
   if (isChecking) {
     return (
       <div className="flex items-center justify-center py-12">

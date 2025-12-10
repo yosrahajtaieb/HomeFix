@@ -1,4 +1,3 @@
-// components/providers/provider-availability.tsx
 type Availability = {
   schedule: {
     day: string;

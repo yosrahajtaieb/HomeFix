@@ -3,9 +3,9 @@
 import type React from "react"
 import { useRef, useState, useEffect } from "react"
 import { createClient } from "@/utils/supabase/client"
-// ...other imports...
 
-// Import components
+
+
 import { Header } from "@/components/landing/header"
 import { HeroSection } from "@/components/landing/hero-section"
 import { ServicesSection } from "@/components/landing/services-section"
@@ -14,12 +14,11 @@ import { ProvidersSection } from "@/components/landing/providers-section"
 import { TestimonialsSection } from "@/components/landing/testimonials-section"
 import { Footer } from "@/components/landing/footer"
 
-// Import data
+
 import { serviceCategories } from "@/data/service-categories"
 
 
 
-// Define the Testimonial type
 type Testimonial = {
   name: string;
   location: string;
@@ -29,7 +28,7 @@ type Testimonial = {
 };
 
 export default function Home() {
-  // Create refs for each section
+
   const servicesRef = useRef<HTMLElement>(null)
   const howItWorksRef = useRef<HTMLElement>(null)
   const providersRef = useRef<HTMLElement>(null)
@@ -88,7 +87,7 @@ useEffect(() => {
     fetchProviders()
   }, [])
 
-  // Fetch testimonials - ADD THIS BACK!
+  
   useEffect(() => {
     const fetchTestimonials = async () => {
       const supabase = createClient();
@@ -131,7 +130,7 @@ useEffect(() => {
 
 
   
-  // Function to scroll to a section
+  
   const scrollToSection = (ref: React.RefObject<HTMLElement>) => {
     if (ref.current) {
       ref.current.scrollIntoView({ behavior: "smooth" })

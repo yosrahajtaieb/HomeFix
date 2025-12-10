@@ -10,7 +10,7 @@ import { BookingsList } from "@/components/providers/dashboard/bookings-list";
 import { BookingsModal } from "@/components/providers/dashboard/bookings-modal";
 import { RecentReviews } from "@/components/providers/dashboard/recent-reviews";
 import { ReviewsModal } from "@/components/providers/dashboard/reviews-modal";
-import { sendClientBookingStatusUpdate } from "@/app/actions/booking-actions"; // ← ADD THIS IMPORT
+import { sendClientBookingStatusUpdate } from "@/app/actions/booking-actions"; 
 import { AccountDetails } from "@/components/providers/dashboard/account-details";
 import type {
   Provider,
@@ -38,7 +38,7 @@ export default function ProviderDashboardPage() {
         return;
       }
 
-      // Fetch provider data
+ 
       const { data: providerData } = await supabase
         .from("providers")
         .select("*")
@@ -46,7 +46,6 @@ export default function ProviderDashboardPage() {
         .single();
       setProvider(providerData);
 
-      // Fetch bookings
       const { data: jobsData } = await supabase
         .from("bookings")
         .select("*, clients(first_name, last_name, address)")
@@ -54,7 +53,7 @@ export default function ProviderDashboardPage() {
         .order("date", { ascending: true });
       setUpcomingJobs(jobsData || []);
 
-      // Fetch reviews from database (removed avatar_url)
+      
       const { data: reviewsData, error: reviewsError } = await supabase
         .from("reviews")
         .select("*, clients(first_name, last_name)")
@@ -84,12 +83,12 @@ export default function ProviderDashboardPage() {
       updateData.notes = reason;
     }
 
-    const { error } = await supabase // ← ADD error variable
+    const { error } = await supabase 
       .from("bookings")
       .update(updateData)
       .eq("id", bookingId);
 
-    // ← ADD THIS: Send email after successful update
+    
     if (!error) {
       sendClientBookingStatusUpdate(bookingId, status, reason).then(
         (result) => {

@@ -20,7 +20,7 @@ export function ContactForm() {
     const { name, value } = e.target
     setFormData((prev) => ({ ...prev, [name]: value }))
 
-    // Clear error when field is edited
+    
     if (errors[name]) {
       setErrors((prev) => {
         const newErrors = { ...prev }
@@ -56,13 +56,13 @@ export function ContactForm() {
     setIsSubmitting(true)
 
     try {
-      // Simulate API call to send message
+   
       await new Promise((resolve) => setTimeout(resolve, 1500))
 
-      // Simulate successful submission
+    
       setIsSuccess(true)
 
-      // Reset form after 3 seconds
+    
       setTimeout(() => {
         setIsSuccess(false)
         setFormData({

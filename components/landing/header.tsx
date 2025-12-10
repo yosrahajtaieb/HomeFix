@@ -15,7 +15,7 @@ export function Header() {
     const determineUserType = async () => {
       const {
         data: { session },
-      } = await supabase.auth.getSession(); // fast, cached
+      } = await supabase.auth.getSession(); 
       const user = session?.user;
 
       setIsLoggedIn(!!user);
