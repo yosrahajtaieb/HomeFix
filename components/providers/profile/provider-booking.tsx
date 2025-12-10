@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { CalendarIcon, Star } from "lucide-react";
 import { createClient } from "@/utils/supabase/client";
 import { sendProviderBookingNotification } from "@/app/actions/booking-actions"; 
@@ -35,7 +35,7 @@ export function ProviderBooking({
   const [reviewSubmitted, setReviewSubmitted] = useState(false);
   const [bookedTimes, setBookedTimes] = useState<string[]>([]);
 
-  const fetchBookedTimes = async (date = selectedDate) => {
+  const fetchBookedTimes = useCallback(async (date = selectedDate) => {
     if (!date) {
       setBookedTimes([]);
       return;
@@ -51,13 +51,14 @@ export function ProviderBooking({
     if (data) {
       setBookedTimes(data.map((b: any) => b.time));
     }
-  };
+  }, [selectedDate, provider.id]);
+
 
 
   
   useEffect(() => {
     fetchBookedTimes();
-  }, [selectedDate]);
+ }, [fetchBookedTimes]);
 
   const getMinimumBookingDate = () => {
     const today = new Date().toISOString().split("T")[0];

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Search, ChevronDown, User as UserIcon } from "lucide-react";
 import { createClient } from "@/utils/supabase/client";
 import { UserDetailsModal } from "./user-details-modal";
@@ -35,11 +35,8 @@ export default function AdminUsersTable() {
 
 
 
-  useEffect(() => {
-    fetchUsers();
-  }, []);
 
-  const fetchUsers = async () => {
+  const fetchUsers = useCallback(async () => {
     setLoading(true);
 
     const { data: usersData, error } = await supabase
@@ -69,7 +66,11 @@ export default function AdminUsersTable() {
 
     setUsers(usersWithBookings);
     setLoading(false);
-  };
+  }, [supabase]);
+
+useEffect(() => {
+  fetchUsers();
+}, [fetchUsers]);
 
   const handleSuspend = async (id: string, activate: boolean) => {
     const { error } = await supabase

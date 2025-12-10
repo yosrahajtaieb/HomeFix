@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Search, User, ChevronDown } from "lucide-react";
 import { createClient } from "@/utils/supabase/client";
 import { ProviderDetailsModal } from "./provider-details-modal";
@@ -40,13 +40,11 @@ export default function AdminProvidersTable() {
 
 
   
-  useEffect(() => {
-    fetchProviders();
-  }, []);
+ 
 
   
 
-    const fetchProviders = async () => {
+    const fetchProviders = useCallback(async () => {
     setLoading(true);
 
     const { data: providersData, error } = await supabase
@@ -91,7 +89,11 @@ export default function AdminProvidersTable() {
 
     setProviders(providersWithStats);
     setLoading(false);
-  };
+  }, [supabase]);
+
+useEffect(() => {
+  fetchProviders();
+}, [fetchProviders]);
 
   const handleSuspend = async (id: string, activate: boolean) => {
     const { error } = await supabase

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import {
   Search,
   ChevronDown,
@@ -57,12 +57,9 @@ export default function AdminBookingsTable() {
   const supabase = createClient();
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
 
-  useEffect(() => {
-    fetchBookings();
-  }, []);
+
   
-  
-  const fetchBookings = async () => {
+  const fetchBookings = useCallback(async () => {
     setLoading(true);
 
   
@@ -112,7 +109,11 @@ export default function AdminBookingsTable() {
 
     setBookings(enrichedBookings);
     setLoading(false);
-  };
+  },[supabase]);
+
+useEffect(() => {
+  fetchBookings();
+}, [fetchBookings]);
 
   const handleConfirm = async (id: string) => {
     const { error } = await supabase
